@@ -9,7 +9,7 @@ namespace WideEye
 {
     public static class BuildInfo
     {
-        public const string Name = "Wideview";
+        public const string Name = "WideEye";
         public const string Version = "1.0.0";
         public const string Author = "HL2H0";
     }
