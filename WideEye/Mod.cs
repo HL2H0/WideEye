@@ -2,7 +2,7 @@
 using UnityEngine;
 using BoneLib.BoneMenu;
 
-[assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "1.0.0", "HL2H0", null)]
+[assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "1.2.0", "HL2H0", null)]
 [assembly: MelonGame("Stress Level Zero", "BONELAB")]
 
 namespace WideEye
@@ -10,7 +10,7 @@ namespace WideEye
     public static class BuildInfo
     {
         public const string Name = "WideEye";
-        public const string Version = "1.0.0";
+        public const string Version = "1.2.0";
         public const string Author = "HL2H0";
     }
 
