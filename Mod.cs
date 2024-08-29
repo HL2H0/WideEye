@@ -1,11 +1,10 @@
-﻿using BoneLib;
-using BoneLib.BoneMenu;
-using Page = BoneLib.BoneMenu.Page;
-using BoneLib.Notifications;
+﻿using BoneLib.BoneMenu;
 using Il2CppSLZ.Bonelab;
 using MelonLoader;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Page = BoneLib.BoneMenu.Page;
+using BoneLib;
 
 [assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "1.2.0", "HL2H0", null)]
 [assembly: MelonGame("Stress Level Zero", "BONELAB")]
@@ -32,7 +31,7 @@ namespace WideEye
         public static FunctionElement getCameraButton { get; private set; }
         public static IntElement fovSlider { get; private set; }
         public static FunctionElement setFovButton { get; private set; }
-        public static FunctionElement resetAllButton { get; private set; }
+        public static FunctionElement resetFovButton { get; private set; }
         public static BoolElement PostSFXToogle { get; private set; }
         public static IntElement PositionSmoothing { get; private set; }
         public static IntElement RotationSmoothing { get; private set; }
@@ -45,11 +44,11 @@ namespace WideEye
         //Needed GameObjects and Components
 
         private static GameObject SC_GameObject;
-        private static GameObject ST_GameObject;
         private static Camera SC_CameraComponent;
         private static SmoothFollower SC_SmootherComponent;
         private static Transform ST_Transform;
         private static Volume SC_VolumeComponent;
+        private static Color ModColor = new Color(69, 28, 232);
         
         //Variables
 
@@ -65,30 +64,34 @@ namespace WideEye
             SetupBoneMenu();
         }
 
-
         public override void OnSceneWasUnloaded(int buildIndex, string sceneName)
         {
             base.OnSceneWasUnloaded(buildIndex, sceneName);
 
-            mainPage.Remove([fovSlider, setFovButton, resetAllButton, PostSFXToogle]);
+            mainPage.Remove([fovSlider, setFovButton, resetFovButton, PostSFXToogle]);
             ExperimentalPage.RemoveAll();
             getCameraButton.ElementColor = Color.red;
             gotcamera = false;
         }
-
 
         //Custom Functions
 
         public static void GetTargetCamera()
         {
             SC_GameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
-            ST_GameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
+            ST_Transform = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target").GetComponent<Transform>();
+            SC_SmootherComponent = SC_GameObject.GetComponent<SmoothFollower>();
+            SC_VolumeComponent = SC_GameObject.GetComponent<Volume>();
+            SC_CameraComponent = SC_GameObject.GetComponent<Camera>();
 
-            List<object> objectsToCheck =
-            [
+            List<object> objectsToCheck = new List<object>
+            {
                 SC_GameObject,
-                ST_GameObject
-            ];
+                ST_Transform,
+                SC_SmootherComponent,
+                SC_VolumeComponent,
+                SC_CameraComponent,
+            };
 
             bool anyNull = false;
             foreach (var obj in objectsToCheck)
@@ -107,24 +110,14 @@ namespace WideEye
             }
             else
             {
-                ST_Transform = ST_GameObject.GetComponent<Transform>();
-                SC_SmootherComponent = SC_GameObject.GetComponent<SmoothFollower>();
-                SC_VolumeComponent = SC_GameObject.GetComponent<Volume>();
-                SC_CameraComponent = SC_GameObject.GetComponent<Camera>();
                 if (!gotcamera)
-                {
+                { 
                     RefreshBoneMenu();
-                    gotcamera = true;
-                    var notifi = new Notification
-                    {
-                        Title = "Success",
-                        Message = "Camera Found !",
-                        Type  = NotificationType.Success,
-                        PopupLength = 2
-                    };
-                    Notifier.Send(notifi);
+                    gotcamera = true; 
                 }
             }
+
+            
         }
 
         public static void SetCameraFOV()
@@ -135,28 +128,12 @@ namespace WideEye
             }
         }
 
-        public static void ResetAll()
+        public static void ResetFOV()
         {
-            //Reset Fov
-            fovSlider.Value = 70;
-            SC_CameraComponent.fieldOfView = defaultFOV;
-
-            //Reset Rotation Offset
-            ST_Transform.localRotation = Quaternion.Euler(0, 10, 0);
-            X_R_Offset.Value = 11;
-            Y_R_Offset.Value = 0;
-            Z_R_Offset.Value = 0;
-
-            //Reset Position And Rotation Smoothing
-            SC_SmootherComponent.TranslationSmoothTime = 0;
-            SC_SmootherComponent.RotationalSmoothTime = 0.07f;
-            PositionSmoothing.Value = 0;
-            RotationSmoothing.Value = 0;
-
-            //Reset Post-Processing
-            SC_VolumeComponent.enabled = true;
-            PostSFXToogle.Value = true;
-
+            if (SC_GameObject != null)
+            {
+                SC_CameraComponent .fieldOfView = defaultFOV;
+            }
         }
 
         public static void Apply_R_Offset()
@@ -176,9 +153,9 @@ namespace WideEye
 
         private static void OnPageOpened(Page page)
         {
-            if (page == ExperimentalPage & !gotcamera)
+            if(page == ExperimentalPage & !gotcamera)
             {
-                Menu.DisplayDialog("Error", "Camera Is Not Found, Please click on the 'Find Camera Button'", Dialog.ErrorIcon, () => Menu.OpenPage(mainPage), null);
+                Menu.DisplayDialog("Error", "Camera Is Not Found, Please click on the 'Find Camera Button'", Dialog.ErrorIcon);
             }
         }
 
@@ -190,7 +167,7 @@ namespace WideEye
             getCameraButton.ElementColor = Color.green;
             fovSlider = mainPage.CreateInt("FOV", Color.white, defaultFOV, 10, int.MinValue, int.MaxValue, null);
             setFovButton = mainPage.CreateFunction("Set FOV", Color.green, SetCameraFOV);
-            resetAllButton = mainPage.CreateFunction("Reset All", Color.red, ResetAll);
+            resetFovButton = mainPage.CreateFunction("Reset FOV", Color.red, ResetFOV);
             PostSFXToogle = mainPage.CreateBool("Post-Processing", Color.yellow, true, isEnabled =>
             { 
                 if (isEnabled) SC_VolumeComponent.enabled = true;
@@ -210,34 +187,16 @@ namespace WideEye
 
         public static void SetupBoneMenu()
         {
-            mainPage = Page.Root.CreatePage("Wide Eye", Color.white);
-
+            mainPage = Page.Root.CreatePage("Wide View", ModColor);
             SupportPage = mainPage.CreatePage("Support", Color.white); 
-            FunctionElement githubButton = new("Open GitHub Issues", Color.white, () =>
+            SupportPage.Add(new FunctionElement("Github issues", Color.white, () =>
             {
                 Application.OpenURL("https://github.com/HL2H0/WideEye/issues");
-                var notifi = new Notification
-                {
-                    Title = "Success",
-                    Message = "Opened the GitHub issues page for WideEye",
-                    Type = NotificationType.Success,
-                    PopupLength = 2
-                };
-                Notifier.Send(notifi);
-            });
-            SupportPage.Add(githubButton);
-
-            SupportPage.Add(new FunctionElement("Discord", Color.blue, () =>
+            }));
+            SupportPage.Add(new FunctionElement("Discord", Color.cyan, () =>
             {
-                var notifi = new Notification
-                {
-                    Title = "Success",
-                    Message = "Copied Username to clipboard",
-                    Type = NotificationType.Success,
-                    PopupLength = 3
-                };
-                Notifier.Send(notifi);
                 GUIUtility.systemCopyBuffer = "@hiiiiiiiiiiiiiiiiii";
+                Menu.DisplayDialog("Copied!", "Copied username to clipboard\n Username : @hiiiiiiiiiiiiiiiiii", Dialog.InfoIcon);
             }));
             ExperimentalPage = mainPage.CreatePage("Experimental", Color.yellow);
             getCameraButton = mainPage.CreateFunction("Find Camera", Color.red, GetTargetCamera);

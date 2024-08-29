@@ -1,5 +1,20 @@
 ﻿# WideEye ChangeLog
 
+
+## [1.2.0]
+
+### Added
+* Smoothing
+* Rotation Offset
+* Support Page
+* Reset All Button
+* Notifications
+
+### Known Issues
+* Position smoothing may cause the spectator camera to clip through head meshes.
+* Levels with scene chunks may un-find the camera but it won't affect the modifications the mod made
+
+
 ## [1.1.0]
 
 ### Added
@@ -7,14 +22,10 @@
 * Added Colors to the mod's menu
 
 ### Changed
-* Changing the field of view or post-processing won't be accessible when the camera is not found, reducing confusion.
+* Changing values won't be accessible when the camera is not found, reducing confusion.
 
 ### Known Issues
 * Levels with scene chunks may un-find the cam but it won't affect the modifications the mod made
-
-### Future Plans 
-* Adding more customization options for post-processing effects.
-* Auto-Find the camera
 
 ## [1.0.0]
 

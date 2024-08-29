@@ -13,6 +13,9 @@
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Include="Mod.cs" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp">
@@ -141,9 +144,6 @@
 		<Reference Include="Il2CppSystem">
 			<HintPath>C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab\MelonLoader\Il2CppAssemblies\Il2CppSystem.dll</HintPath>
 		</Reference>
-		<Reference Include="Il2CppSystem.IO.Abstractions">
-			<HintPath>C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab\MelonLoader\Il2CppAssemblies\Il2CppSystem.IO.Abstractions.dll</HintPath>
-		</Reference>
 		<Reference Include="Il2CppSystem.IO.Compression">
 			<HintPath>C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab\MelonLoader\Il2CppAssemblies\Il2CppSystem.IO.Compression.dll</HintPath>
 		</Reference>
@@ -188,9 +188,6 @@
 		</Reference>
 		<Reference Include="Il2CppURPUnsafe">
 			<HintPath>C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab\MelonLoader\Il2CppAssemblies\Il2CppURPUnsafe.dll</HintPath>
-		</Reference>
-		<Reference Include="Il2CppWave.OpenXR">
-			<HintPath>C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab\MelonLoader\Il2CppAssemblies\Il2CppWave.OpenXR.dll</HintPath>
 		</Reference>
 		<Reference Include="Il2Cppwebsocket-sharp">
 			<HintPath>C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab\MelonLoader\Il2CppAssemblies\Il2Cppwebsocket-sharp.dll</HintPath>
@@ -547,10 +544,6 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<Compile Include="Mod.cs" />
-	</ItemGroup>
 	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="COPY &quot;$(TargetPath)&quot; &quot;C:\Program Files\Oculus\Software\Software\stress-level-zero-inc-bonelab\Mods&quot;" />
