@@ -1,4 +1,4 @@
-﻿#  WideEye
+#  WideEye
 
 ## This mod does not change the actual FOV of your headset !
 
@@ -30,7 +30,7 @@ Your feedback is important to me and helps me improve WideEye. Thank you for usi
 
 * Aiden - [BONELAB Icon Template](https://www.figma.com/community/file/1218386424917309834)
 * TrevTV - [MelonLoader Mod Template](https://github.com/TrevTV/MelonLoader.VSWizard)
-* WaveSmashies - [Smoothing and Rotation Offset Idea](https://github.com/HL2H0/WideEye/issues/1)
+* WaveSmash - [Smoothing and Rotation Offset Idea](https://github.com/HL2H0/WideEye/issues/1)
 
 ## Future Plans
 * Adding more customization options for post-processing effects.
