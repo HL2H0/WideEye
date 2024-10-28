@@ -1,13 +1,23 @@
-﻿using BoneLib;
+﻿using System.Collections;
+
 using BoneLib.BoneMenu;
-using Page = BoneLib.BoneMenu.Page;
+using BoneLib;
 using BoneLib.Notifications;
+
 using Il2CppSLZ.Bonelab;
 using MelonLoader;
+
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
-[assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "1.2.0", "HL2H0", null)]
+using Il2CppOccaSoftware.Exposure.Runtime;
+
+using static WideEye.MenuSetup;
+using static WideEye.ModPreferences;
+using Il2CppSLZ.Marrow;
+
+[assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "2.0.0", "HL2H0", null)]
 [assembly: MelonGame("Stress Level Zero", "BONELAB")]
 
 namespace WideEye
@@ -15,232 +25,413 @@ namespace WideEye
     public static class BuildInfo
     {
         public const string Name = "WideEye";
-        public const string Version = "1.2.0";
+        public const string Version = "2.0.0";
         public const string Author = "HL2H0";
     }
 
     public class Mod : MelonMod
     {
-        //BoneMenu Pages
-
-        public static Page mainPage { get; private set; }
-        public static Page ExperimentalPage { get; private set; }
-        public static Page SupportPage { get; private set; }
-
-        //BoneMenu Elements
-
-        public static FunctionElement getCameraButton { get; private set; }
-        public static IntElement fovSlider { get; private set; }
-        public static FunctionElement setFovButton { get; private set; }
-        public static FunctionElement resetAllButton { get; private set; }
-        public static BoolElement PostSFXToogle { get; private set; }
-        public static IntElement PositionSmoothing { get; private set; }
-        public static IntElement RotationSmoothing { get; private set; }
-        public static FunctionElement ApplySmoothingButton { get; private set; }
-        public static FloatElement X_R_Offset { get; private set; }
-        public static FloatElement Y_R_Offset { get; private set; }
-        public static FloatElement Z_R_Offset { get; private set; }
-        public static FunctionElement Apply_R_OffsetButton { get; private set; }
-
         //Needed GameObjects and Components
 
-        private static GameObject SC_GameObject;
-        private static GameObject ST_GameObject;
-        private static Camera SC_CameraComponent;
-        private static SmoothFollower SC_SmootherComponent;
-        private static Transform ST_Transform;
-        private static Volume SC_VolumeComponent;
-        
-        //Variables
+        public static PlayerAvatarArt RM_playerArtComponent;
 
-        private static int defaultFOV = 70;
+        public static GameObject SC_GameObject;
+        public static GameObject ST_GameObject;
+        public static Camera SC_CameraComponent;
+        public static SmoothFollower SC_SmootherComponent;
+        public static Transform ST_Transform;
+        public static Volume SC_VolumeComponent;
+
+
+
+        //Post-FX Overrides
+        private static LensDistortion LensDistortionOverride;
+        private static ChromaticAberration chromaticAberrationOverride;
+        private static AutoExposure autoExposureOverride;
+
+        //Enums
+
+        public enum OffsetType { Position, Rotation }
+        public enum ResetType { Fov, Smoothing, RotationOffset, PostionOffset, LensDistortion, ChromaticAberration, AutoExposure, All }
+        public enum PostFXType { LensDistortion, ChromaticAberration, AutoExposure }
+        public enum CameraMode { Head, Pinned }
+        public enum LookAtPositionType { RightHand, LeftHand, Head }
+        public enum OtherType { HairMeshes, HeadMesh, PostFX };
+
+        //Variables
+        public static Transform LookAtTransform;
+        public static CameraMode cameraMode = CameraMode.Head;
+        public static bool LookAtPlayer = false;
         private static bool gotcamera = false;
 
-        //MelonLoader Events
+        //Method made for makeing things easier
+        public static void SendNotfi(string Title, string Message, NotificationType Type, float PopupLength, bool showTitleOnPopup)
+        {
+            var notfi = new Notification
+            {
+                Title = Title,
+                Message = Message,
+                Type = Type,
+                PopupLength = PopupLength,
+                ShowTitleOnPopup = showTitleOnPopup
+            };
+            Notifier.Send(notfi);
+        }
+
+        //MelonLoader & BoneLib Events
 
         public override void OnInitializeMelon()
         {
-            LoggerInstance.Msg("WideEye 1.2.0 Has Been Initialized.");
-            Menu.OnPageOpened += OnPageOpened;
+            CreatePref();
             SetupBoneMenu();
+            Hooking.OnLevelUnloaded += BoneLib_OnLevelUnloaded;
+            Hooking.OnUIRigCreated += BoneLib_OnUIRigCreated;
+            LoggerInstance.Msg("WideEye 2.0.0 Has Been Initialized.");
         }
 
-
-        public override void OnSceneWasUnloaded(int buildIndex, string sceneName)
+        private void BoneLib_OnUIRigCreated()  
         {
-            base.OnSceneWasUnloaded(buildIndex, sceneName);
+            MelonCoroutines.Start(WaitForCameraRig());
+            MelonLogger.Msg(System.ConsoleColor.Green, "UI Rig Created, Trying To Get Camera...");
+        }
 
-            mainPage.Remove([fovSlider, setFovButton, resetAllButton, PostSFXToogle]);
-            ExperimentalPage.RemoveAll();
-            getCameraButton.ElementColor = Color.red;
+        private void BoneLib_OnLevelUnloaded()
+        {
+            cameraMode = CameraMode.Head;
             gotcamera = false;
+            LookAtPlayer = false;
+            Ele_LookAtPlayer.Value = false;
         }
 
-
-        //Custom Functions
-
-        public static void GetTargetCamera()
+        public override void OnUpdate()
         {
-            SC_GameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
-            ST_GameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
-
-            List<object> objectsToCheck =
-            [
-                SC_GameObject,
-                ST_GameObject
-            ];
-
-            bool anyNull = false;
-            foreach (var obj in objectsToCheck)
+            base.OnUpdate();
+            if (LookAtPlayer && cameraMode == CameraMode.Pinned && gotcamera)
             {
-                if (obj == null)
-                {
-                    anyNull = true;
-                    break;
-                }
+                SC_GameObject.transform.LookAt(LookAtTransform);
             }
+        }
 
-            if (anyNull)
+        
+
+        //Methods to ensure everything is collected
+        private static IEnumerator WaitForCameraRig()
+        {
+            yield return new WaitForSeconds(5f);
+            GetTargetCamera(true);
+        }
+
+        public static void GetTargetCamera(bool isAuto)
+        {
+            if (HelperMethods.IsAndroid())
             {
-                MelonLogger.Error("Spectator Camera Components Not Found");
-                Menu.DisplayDialog("Error", "Wow, that's rare! It looks like the camera couldn't be found.\n Try again.If the error keeps happening, go to the support page.", Dialog.ErrorIcon);
+                SendNotfi("WideEye | Error", "WideEye doesn't work with Android", NotificationType.Error, 3f, true);
             }
             else
             {
-                ST_Transform = ST_GameObject.GetComponent<Transform>();
-                SC_SmootherComponent = SC_GameObject.GetComponent<SmoothFollower>();
-                SC_VolumeComponent = SC_GameObject.GetComponent<Volume>();
-                SC_CameraComponent = SC_GameObject.GetComponent<Camera>();
-                if (!gotcamera)
+                SC_GameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
+                ST_GameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
+
+                if (SC_GameObject == null || ST_GameObject == null)
                 {
-                    RefreshBoneMenu();
-                    gotcamera = true;
-                    var notifi = new Notification
+                    if (isAuto)
                     {
-                        Title = "Success",
-                        Message = "Camera Found !",
-                        Type  = NotificationType.Success,
-                        PopupLength = 2
-                    };
-                    Notifier.Send(notifi);
+                        SendNotfi("WideEye | Error", "Couldn't find the camera automatically.\nPlease open WideEye's menu and find it manually.", NotificationType.Error, 3, true);
+                        MelonLogger.Error("Couldn't find the camera automatically");
+                        mainPage.Add(GetCameraButton);
+                    }
+                    else
+                    {
+                        SendNotfi("WideEye | Error", "Couldn't find the camera.", NotificationType.Error, 3, true);
+                        MelonLogger.Error("Couldn't find the camera");
+                    }
+
+                }
+                else if (!gotcamera)
+                {
+                    if (!SC_GameObject.active)
+                    {
+                        SendNotfi("WideEye | Warning", "Spectator Camera Is Not Active.\nModifications will not take action.", NotificationType.Warning, 5, true);
+                        MelonLogger.Warning("Spectator Camera Is Not Active. Modifications will not take action.");
+                    }
+
+                    RM_playerArtComponent = Player.ControllerRig.gameObject.GetComponent<PlayerAvatarArt>();
+                    ST_Transform = ST_GameObject.GetComponent<Transform>();
+                    SC_SmootherComponent = SC_GameObject.GetComponent<SmoothFollower>();
+                    SC_VolumeComponent = SC_GameObject.GetComponent<Volume>();
+                    SC_CameraComponent = SC_GameObject.GetComponent<Camera>();
+                    GetPostFXOverrides();
+                    if (isAuto)
+                    {
+                        SendNotfi("WideEye | Scusses", "Found camera automatically", NotificationType.Success, 3, true);
+                        MelonLogger.Msg(System.ConsoleColor.Green, "Found camera automatically");
+                    }
+                    else
+                    {
+                        mainPage.Remove(GetCameraButton);
+                        SendNotfi("WideEye | Scusses", "Found camera manually", NotificationType.Success, 2, true);
+                        MelonLogger.Msg(System.ConsoleColor.Green, "Found camera manually");
+                    }
+                    
+                    LoadPref();
+                    gotcamera = true;
+                    LookAtTransform = Player.Head.transform;
                 }
             }
         }
 
-        public static void SetCameraFOV()
+        public static void GetPostFXOverrides()
         {
-            if (SC_GameObject != null)
+            SC_VolumeComponent.profile.TryGet(out LensDistortionOverride);
+            SC_VolumeComponent.profile.TryGet(out chromaticAberrationOverride);
+            SC_VolumeComponent.profile.TryGet(out autoExposureOverride);        
+        }
+
+        //"Apply Methods"
+
+        public static void ResetToDefault(ResetType resetType)
+        {
+            switch (resetType)
             {
-                SC_CameraComponent.fieldOfView = fovSlider.Value;
+                case ResetType.Fov:
+                    ApplyFOV(75, true, fovSlider);
+                    break;
+
+                case ResetType.Smoothing:
+                    ApplySmoothing(0, 0, true);
+                    break;
+
+                case ResetType.RotationOffset:
+                    ApplyOffset(new(11, 0, 0), OffsetType.Rotation, true, X_R_Offset, Y_R_Offset, Z_R_Offset);
+                    break;
+                
+                case ResetType.PostionOffset:
+                    ApplyOffset(new(0, 0, 0), OffsetType.Position, true, X_P_Offset, Y_P_Offset, Z_P_Offset);
+                    break;
+
+                case ResetType.LensDistortion:
+                    ApplyLD(true, new Vector2(0.5f, 0.5f), 0.48f, 1, 0.59f, 1, true);
+                    break;
+
+                case ResetType.ChromaticAberration:
+                    ApplyCA(true, 0.123f, true);
+                    break;
+
+                case ResetType.AutoExposure:
+                    ApplyAE(true, AutoExposureAdaptationMode.Progressive, 3, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2, true);
+                    break;
+
+                case ResetType.All:
+                    ApplyFOV(75, true, fovSlider);
+                    ApplySmoothing(0, 0, true);
+                    ApplyOffset(new(11, 0, 0), OffsetType.Rotation, true, X_R_Offset, Y_R_Offset, Z_R_Offset);
+                    ApplyOffset(new(0, 0, 0), OffsetType.Position, true, X_P_Offset, Y_P_Offset, Z_P_Offset);
+                    ApplyLD(true, new Vector2(0.5f, 0.5f), 0.48f, 1, 0.59f, 1, true);
+                    ApplyCA(true, 0.123f, true);
+                    ApplyAE(true, AutoExposureAdaptationMode.Progressive, 3, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2, true);
+                    SC_VolumeComponent.enabled = true;
+                    PostFXToogle.Value = true;
+                    break;
+            }
+
+        }
+
+        public static void ApplyCameraMode(CameraMode mode)
+        {
+            cameraMode = mode;
+            switch (mode)
+            {
+                case CameraMode.Head:
+                    
+                    SC_SmootherComponent.enabled = true;
+                    LookAtPlayer = false;
+                    Ele_LookAtPlayer.Value = false;
+                    break;
+                case CameraMode.Pinned:
+                    SC_SmootherComponent.enabled = false;
+                    break;
             }
         }
 
-        public static void ResetAll()
+        public static void ApplyLookAtTransform(LookAtPositionType type)
         {
-            //Reset Fov
-            fovSlider.Value = 70;
-            SC_CameraComponent.fieldOfView = defaultFOV;
-
-            //Reset Rotation Offset
-            ST_Transform.localRotation = Quaternion.Euler(0, 10, 0);
-            X_R_Offset.Value = 11;
-            Y_R_Offset.Value = 0;
-            Z_R_Offset.Value = 0;
-
-            //Reset Position And Rotation Smoothing
-            SC_SmootherComponent.TranslationSmoothTime = 0;
-            SC_SmootherComponent.RotationalSmoothTime = 0.07f;
-            PositionSmoothing.Value = 0;
-            RotationSmoothing.Value = 0;
-
-            //Reset Post-Processing
-            SC_VolumeComponent.enabled = true;
-            PostSFXToogle.Value = true;
-
+            switch (type)
+            {
+                case LookAtPositionType.Head:
+                    LookAtTransform = Player.Head.transform;
+                    break;
+                case LookAtPositionType.RightHand:
+                    LookAtTransform = Player.RightHand.transform;
+                    break;
+                case LookAtPositionType.LeftHand:
+                    LookAtTransform = Player.LeftHand.transform;
+                    break;
+            };
         }
 
-        public static void Apply_R_Offset()
+        public static void ApplyFOV(float fov, bool SyncElementValue = false, FloatElement FovEle = null)
         {
-            if (ST_Transform != null)
+            SC_CameraComponent.fieldOfView = fov;
+            if (SyncElementValue)
             {
-                Vector3 offset = new Vector3(X_R_Offset.Value, Y_R_Offset.Value, Z_R_Offset.Value);
-                ST_Transform.localRotation = Quaternion.Euler(offset);
+                FovEle.Value = fov;
             }
         }
 
+        public static void ApplyOther(OtherType type, bool value, bool syncElemnent = false)
+        {
+            switch(type)
+            {
+                case OtherType.PostFX:
+                    SC_VolumeComponent.enabled = value;
+                    break;
+                case OtherType.HeadMesh:
+                    if (value == false) RM_playerArtComponent.DisableHead();
+                    else RM_playerArtComponent.EnableHead();
+                    foreach(var mesh in Player.Avatar.headMeshes) mesh.enabled = value;
+                    break;
+
+                case OtherType.HairMeshes:
+                    if (value == false) RM_playerArtComponent.DisableHair();
+                    else RM_playerArtComponent.EnableHair();
+                    foreach (var mesh in Player.Avatar.hairMeshes) mesh.enabled = value;
+                    break;
+            }
+            
+            if (syncElemnent)
+            {
+                PostFXToogle.Value = value;
+            }
+
+        }
+
+        public static void ApplyOffset(Vector3 Offset, OffsetType offsetType, bool SyncElementValue = false, FloatElement EleX = null, FloatElement EleY = null, FloatElement EleZ = null)
+        { 
+            switch (offsetType)
+            {
+                case OffsetType.Position:
+                    ST_Transform.localPosition = Offset;
+                    break;
+
+                case OffsetType.Rotation:
+                    ST_Transform.localRotation = Quaternion.Euler(Offset);
+                    break;
+            }
+            if (SyncElementValue)
+            {
+                EleX.Value = Offset.x;
+                EleY.Value = Offset.y;
+                EleZ.Value = Offset.z;
+            }
+        }
+        public static void ApplyOffset(OffsetType type)
+        {
+            switch (type)
+            {
+                case OffsetType.Rotation:
+                    ST_Transform.localRotation = Quaternion.Euler(X_R_Offset.Value, Y_R_Offset.Value, Z_R_Offset.Value);
+                    break;
+                case OffsetType.Position:
+                    ST_Transform.localPosition = new(X_P_Offset.Value, Y_P_Offset.Value, Z_P_Offset.Value);
+                    break;
+            }
+        }
+        public static void ApplyLD(bool Enabled, Vector2 Center, float Intensity, float Scale, float xMulti, float yMulti, bool SyncElements)
+        {
+            LensDistortionOverride.active = Enabled;
+            LensDistortionOverride.center.value = Center;
+            LensDistortionOverride.intensity.value = Intensity;
+            LensDistortionOverride.scale.value = Scale;
+            LensDistortionOverride.xMultiplier.value = xMulti;
+            LensDistortionOverride.yMultiplier.value = yMulti;
+            if (SyncElements)
+            {
+                LD_Enabled.Value = Enabled;
+                LD_CenterX.Value = Center.x;
+                LD_CenterY.Value = Center.y;
+                LD_Intensity.Value = Intensity;
+                LD_Scale.Value = Scale;
+                LD_xMultiplier.Value = xMulti;
+                LD_yMultiplier.Value = yMulti;
+            }
+        }
+        public static void ApplyLD()
+        {
+            LensDistortionOverride.active = LD_Enabled.Value;
+            LensDistortionOverride.center.value = new(LD_CenterX.Value, LD_CenterY.Value);
+            LensDistortionOverride.intensity.value = LD_Intensity.Value;
+            LensDistortionOverride.scale.value = LD_Scale.Value;
+            LensDistortionOverride.xMultiplier.value = LD_xMultiplier.Value;
+            LensDistortionOverride.yMultiplier.value = LD_yMultiplier.Value;
+        }
+
+        public static void ApplyCA(bool Enabled, float Intensity, bool SyncElements)
+        {
+            chromaticAberrationOverride.active = Enabled;
+            chromaticAberrationOverride.intensity.value = Intensity;
+            if(SyncElements)
+            {
+                CA_Enabled.Value = Enabled;
+                CA_Intensity.Value = Intensity;
+            }
+        }
+        public static void ApplyCA()
+        {
+            chromaticAberrationOverride.active = CA_Enabled.Value;
+            chromaticAberrationOverride.intensity.value = CA_Intensity.Value;
+        }
+
+        public static void ApplyAE(bool Enabled, AutoExposureAdaptationMode adaptationMode, float D2LS, float evCompen, float evMax, float evMin, float L2DS, AutoExposureMeteringMaskMode meteringMaskMode, float MeteringProceduralFalloff, bool SyncElements)
+        {
+            autoExposureOverride.active = Enabled;
+            autoExposureOverride.adaptationMode.value = adaptationMode;
+            autoExposureOverride.darkToLightSpeed.value = D2LS;
+            autoExposureOverride.evCompensation.value = evCompen;
+            autoExposureOverride.evMax.value = evMax;
+            autoExposureOverride.evMin.value = evMin;
+            autoExposureOverride.lightToDarkSpeed.value = L2DS;
+            autoExposureOverride.meteringMaskMode.value = meteringMaskMode;
+            autoExposureOverride.meteringProceduralFalloff.value = MeteringProceduralFalloff;
+            if ( SyncElements )
+            {
+                AE_enabled.Value = Enabled;
+                AE_adaptationMode.Value = adaptationMode;
+                AE_D2LS.Value = D2LS;
+                AE_evCompensation.Value = evCompen;
+                AE_evMax.Value = evMax;
+                AE_evMin.Value = evMin;
+                AE_L2DS.Value = L2DS;
+                AE_MeteringMaskMode.Value = meteringMaskMode;
+                AE_MeteringProceduralFalloff.Value = MeteringProceduralFalloff;
+            }
+        }
+        public static void ApplyAE()
+        {
+            autoExposureOverride.active = AE_enabled.Value;
+            autoExposureOverride.adaptationMode.value = (AutoExposureAdaptationMode)AE_adaptationMode.Value;
+            autoExposureOverride.darkToLightSpeed.value = AE_D2LS.Value;
+            autoExposureOverride.evCompensation.value = AE_evCompensation.Value;
+            autoExposureOverride.evMax.value = AE_evMax.Value;
+            autoExposureOverride.evMin.value = AE_evMin.Value;
+            autoExposureOverride.lightToDarkSpeed.value = AE_L2DS.Value;
+            autoExposureOverride.meteringMaskMode.value = (AutoExposureMeteringMaskMode)AE_MeteringMaskMode.Value;
+            autoExposureOverride.meteringProceduralFalloff.value = AE_MeteringProceduralFalloff.Value;
+        }
+
+        public static void ApplySmoothing(float RotationSmoothingValue, float PositionSmoothingValue, bool SyncElementValue)
+        {
+            SC_SmootherComponent.RotationalSmoothTime = RotationSmoothingValue;
+            SC_SmootherComponent.TranslationSmoothTime = PositionSmoothingValue;
+            if (SyncElementValue)
+            {
+                P_Smoothing.Value = RotationSmoothingValue;
+                R_Smoothing.Value = PositionSmoothingValue;
+            }
+        }
         public static void ApplySmoothing()
         {
-            SC_SmootherComponent.RotationalSmoothTime = RotationSmoothing.Value;
-            SC_SmootherComponent.TranslationSmoothTime = PositionSmoothing.Value;
-        }
-
-        private static void OnPageOpened(Page page)
-        {
-            if (page == ExperimentalPage & !gotcamera)
-            {
-                Menu.DisplayDialog("Error", "Camera Is Not Found, Please click on the 'Find Camera Button'", Dialog.ErrorIcon, () => Menu.OpenPage(mainPage), null);
-            }
-        }
-
-        //BoneMenu Creation And Setup
-
-        public static void RefreshBoneMenu()
-        {
-            //Main Page
-            getCameraButton.ElementColor = Color.green;
-            fovSlider = mainPage.CreateInt("FOV", Color.white, defaultFOV, 10, int.MinValue, int.MaxValue, null);
-            setFovButton = mainPage.CreateFunction("Set FOV", Color.green, SetCameraFOV);
-            resetAllButton = mainPage.CreateFunction("Reset All", Color.red, ResetAll);
-            PostSFXToogle = mainPage.CreateBool("Post-Processing", Color.yellow, true, isEnabled =>
-            { 
-                if (isEnabled) SC_VolumeComponent.enabled = true;
-                else SC_VolumeComponent.enabled = false;
-            });
-
-            //Experimental Page
-            X_R_Offset = ExperimentalPage.CreateFloat("X Rotation Offset", Color.red, 11, 0.1f, float.MinValue, float.MaxValue, null);
-            Y_R_Offset = ExperimentalPage.CreateFloat("Y Rotation Offset", Color.green, 0, 0.1f, float.MinValue, float.MaxValue, null);
-            Z_R_Offset = ExperimentalPage.CreateFloat("Z Rotation Offset", Color.blue, 0, 0.1f, float.MinValue, float.MaxValue, null);
-            Apply_R_OffsetButton = ExperimentalPage.CreateFunction("Apply Rotation Offset", Color.white, Apply_R_Offset);
-
-            PositionSmoothing = ExperimentalPage.CreateInt("Position Smoothing", Color.white, 0, 1, int.MinValue, int.MaxValue, null);
-            RotationSmoothing = ExperimentalPage.CreateInt("Rotation Smoothing", Color.white, 0, 1, int.MinValue, int.MaxValue, null);
-            ApplySmoothingButton = ExperimentalPage.CreateFunction("Apply Values", Color.white, ApplySmoothing);
-        }
-
-        public static void SetupBoneMenu()
-        {
-            mainPage = Page.Root.CreatePage("Wide Eye", Color.white);
-
-            SupportPage = mainPage.CreatePage("Support", Color.white); 
-            FunctionElement githubButton = new("Open GitHub Issues", Color.white, () =>
-            {
-                Application.OpenURL("https://github.com/HL2H0/WideEye/issues");
-                var notifi = new Notification
-                {
-                    Title = "Success",
-                    Message = "Opened the GitHub issues page for WideEye",
-                    Type = NotificationType.Success,
-                    PopupLength = 2
-                };
-                Notifier.Send(notifi);
-            });
-            SupportPage.Add(githubButton);
-
-            SupportPage.Add(new FunctionElement("Discord", Color.blue, () =>
-            {
-                var notifi = new Notification
-                {
-                    Title = "Success",
-                    Message = "Copied Username to clipboard",
-                    Type = NotificationType.Success,
-                    PopupLength = 3
-                };
-                Notifier.Send(notifi);
-                GUIUtility.systemCopyBuffer = "@hiiiiiiiiiiiiiiiiii";
-            }));
-            ExperimentalPage = mainPage.CreatePage("Experimental", Color.yellow);
-            getCameraButton = mainPage.CreateFunction("Find Camera", Color.red, GetTargetCamera);
+            SC_SmootherComponent.RotationalSmoothTime = R_Smoothing.Value;
+            SC_SmootherComponent.TranslationSmoothTime = P_Smoothing.Value;
         }
     }
 }
