@@ -1,7 +1,11 @@
-﻿using BoneLib.Notifications;
-using Il2CppOccaSoftware.Exposure.Runtime;
-using MelonLoader;
+﻿using MelonLoader;
+
 using UnityEngine;
+
+using BoneLib.Notifications;
+
+using Il2CppOccaSoftware.Exposure.Runtime;
+
 using static WideEye.Mod;
 using static WideEye.MenuSetup;
 
@@ -82,9 +86,8 @@ namespace WideEye
 
         public static void LoadPref()
         {
-
             ApplyFOV(Pref_Fov.Value, true, fovSlider);
-            ApplyOther(Pref_PostFX.Value, SyncElements: true);
+            ApplyOther(OtherType.PostFX, Pref_PostFX.Value, true);
             PostFXToogle.Value = Pref_PostFX.Value;
             ApplyOffset(Pref_RotationOffset.Value, OffsetType.Rotation, true, X_R_Offset, Y_R_Offset, Z_R_Offset);
             ApplyOffset(Pref_PositionOffset.Value, OffsetType.Position, true, X_P_Offset, Y_P_Offset, Z_P_Offset);
@@ -92,6 +95,8 @@ namespace WideEye
             ApplyLD(Pref_LD_Enabled.Value, Pref_LD_Center.Value, Pref_LD_Intensity.Value, Pref_LD_Scale.Value, Pref_LD_xMultiplier.Value, Pref_LD_yMultiplier.Value, true);
             ApplyCA(Pref_CA_Enabled.Value, Pref_CA_Intensity.Value, true);
             ApplyAE(Pref_AE_Enabled.Value, Pref_AE_AdaptationMode.Value, Pref_AE_D2LS.Value, Pref_AE_evCompensation.Value, Pref_AE_evMax.Value, Pref_AE_evMin.Value, Pref_AE_L2DS.Value, Pref_AE_Metering_Mask.Value, Pref_AE_MetProcedFalloff.Value, true);
+            SendNotfi("WideEye | Success", "Loaded Preferences.", NotificationType.Success, 2, true);
+            MelonLogger.Msg(ConsoleColor.Green, "Loaded Preferences.");
         }
 
         public static void SavePref()
@@ -127,14 +132,13 @@ namespace WideEye
             Categ_PFX_LD.SaveToFile(false);
             Categ_PFX_CA.SaveToFile(false);
             Categ_PFX_AE.SaveToFile(false);
-            SendNotfi("Success", "Saved Preferences.", NotificationType.Success, 1, true);
-            MelonLogger.Msg(System.ConsoleColor.Green, "Saved Preferences.");
-
+            SendNotfi("WideEye | Success", "Saved Preferences.", NotificationType.Success, 2, true);
+            MelonLogger.Msg(ConsoleColor.Green, "Saved Preferences.");
         }
 
         public static void ClearPref()
         {
-            SendNotfi("Please Wait", "Clearing Preferences...", NotificationType.Information, 2, true);
+            SendNotfi("WideEye | Please Wait", "Clearing Preferences...", NotificationType.Information, 2, true);
             MelonLogger.Msg("Clearing Preferences...");
             var categ = Categ_WideEye.Entries
             .Concat(Categ_PFX_LD.Entries)
@@ -147,8 +151,8 @@ namespace WideEye
                 entry.ResetToDefault();
             }
             LoadPref();
-            SendNotfi("Done!", "Cleared All Preferences", NotificationType.Success, 2, true);
-            MelonLogger.Msg(System.ConsoleColor.Green, "Done!, Cleared All Preferences");
+            SendNotfi("WideEye | Done!", "Cleared All Preferences", NotificationType.Success, 2, true);
+            MelonLogger.Msg(ConsoleColor.Green, "Done!, Cleared All Preferences");
         }
 
     }

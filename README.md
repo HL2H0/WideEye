@@ -1,44 +1,112 @@
 #  WideEye
 
-## This mod does not change the actual FOV of your headset !
+> **Important Note:** This mod does not change the actual field of view (FOV) of your VR headset.
 
-**WideEye** is a simple mod that allows you to adjust the spectator camera in BONELAB
+**WideEye** is a BONELAB mod that tweaks the spectator camera, allowing for FOV control,  post-processing effects, and more! It enhances the spectator camera visuals and optimizes settings for content creation, giving users tools to customize details to their liking.
+
 
 ## Features
-* Adjust the spectator camera's FOV.
-* Toggle post-processing effects.
-* Smoothing. 
-Note: Using position smoothing may cause the spectator camera to clip through head meshes.
- * Rotation Offset.
+
+* FOV Control
+
+* Preferences Saving
+
+* Auto-Apply Settings
+
+* Offset :
+	* Position
+	* Rotation
+	
+* Smoothing :
+	* Position
+	* Rotation
+	
+* Camera Modes :
+	* Head : Camera moves with the player's head
+	* Pinned : Camera stays in place
+
+*  Avatar Mesh Control (On | Off) :
+	* Hair Meshes
+	* Head Meshes
+
+* Post-Processing Control :
+	* Auto Exposure
+	* Chromatic Aberration
+	* Lens Distortion
 
 ##  Requirements
 
+* PC
 * BONELAB Patch 5+
+* MelonLoader 0.6+
 * [BoneLib-3.1.1](https://thunderstore.io/c/bonelab/p/gnonme/BoneLib/)
 
 ## Installation
- 1. Download the latest WideEye release from [Here](https://thunderstore.io/c/bonelab/p/HL2H0/WideEye/).
- 2. Extract the downloaded file.
- 3. Copy the extracted "WideEye.dll" file to the "mods" folder within your BONELAB installation directory.
+1. Download the latest WideEye release from [**Thunderstore**](https://thunderstore.io/c/bonelab/p/HL2H0/WideEye/).
+2. Extract the downloaded file.
+3. Move the extracted `WideEye.dll` to your `Mods` folder in your BONELAB installation directory. 
 
-## Issues or Feedback
-If you encounter any issues or have suggestions for improvements, please submit them on WideEye's GitHub issues page: https://github.com/HL2H0/WideEye/issues.
+## Issues, Feedback, and Contributing
 
-Your feedback is important to me and helps me improve WideEye. Thank you for using my mod!
 
-##  Special Thanks
+WideEye is open-source and invites contributions! If you have ideas for improvement, fork the GitHub repository, make your changes, and submit a pull request. Thank you for helping make WideEye better!
+
+Use the WideEye [**GitHub issues page**](https://github.com/HL2H0/WideEye/issues) to report any issues you run into, or make any suggestions you have to improve it. All of these comments help make WideEye a better experience for everyone.
+
+Thanks for using WideEye! 
+
+## Contributions 
+
+This project has benefitted from the following people: 
+
+* **[WaveSmash](https://github.com/WaveSmashies)** (Smoothing, Rotation offset) *[Suggestion]*
+* **[xDraxxis](https://github.com/xDraxxis)** (Position offset, Preferences) *[Suggestions]*
+
+ Thank you to all contributors for your valuable input!
+
+##  Credits
 
 * Aiden - [BONELAB Icon Template](https://www.figma.com/community/file/1218386424917309834)
 * TrevTV - [MelonLoader Mod Template](https://github.com/TrevTV/MelonLoader.VSWizard)
-* WaveSmash - [Smoothing and Rotation Offset Idea](https://github.com/HL2H0/WideEye/issues/1)
 
 ## Future Plans
-* Adding more customization options for post-processing effects.
-* Auto-Find the camera
+* Handheld Mode
+* Presets System
+* MKGlow Settings
+* Custom UI
 
 # ChangeLog
 
-## [1.2.0]
+## [2.0.0] **Major Update**
+
+### Added
+* Preferences Saving
+
+* Camera Auto-Finding
+
+* Position Offset
+
+* Post-Processing Control :
+	* Auto Exposure
+	* Chromatic Aberration
+	* Lens Distortion
+	
+* Camera Modes :
+	* Pinned
+	* Head
+
+* Avatar Mesh Control (On | Off) :
+	* Hair Meshes
+	* Head Meshes
+
+### Changed
+* UI Improvements
+
+### Fixed
+* Levels with scene chunks no longer un-finds the camera
+
+
+## [1.2.0] **Regular Update**
 
 ### Added
 * Smoothing
@@ -51,7 +119,7 @@ Your feedback is important to me and helps me improve WideEye. Thank you for usi
 * Position smoothing may cause the spectator camera to clip through head meshes.
 * Levels with scene chunks may un-find the camera but it won't affect the modifications the mod made
 
-## [1.1.0]
+## [1.1.0] **Regular Update**
 
 ### Added
 * Added ability to toggle post-processing.

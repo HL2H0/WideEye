@@ -1,7 +1,10 @@
 ﻿using BoneLib.BoneMenu;
 using BoneLib.Notifications;
+
 using Il2CppOccaSoftware.Exposure.Runtime;
+
 using UnityEngine;
+
 using static WideEye.Mod;
 using static WideEye.ModPreferences;
 
@@ -9,9 +12,10 @@ namespace WideEye
 {
     public class MenuSetup
     {
+        public static FunctionElement GetCameraButton = new("Get Camera", Color.red, () => GetTargetCamera(false));
+
         public static Page mainPage;
         public static FloatElement fovSlider { get; private set; }
-
         public static Page SmoothingPage { get; private set; }
         public static FloatElement P_Smoothing { get; private set; }
         public static FloatElement R_Smoothing { get; private set; }
@@ -27,6 +31,8 @@ namespace WideEye
         public static Page PostFXPage { get; private set; }
         public static BoolElement PostFXToogle { get; private set; }
         public static Page OtherPage { get; private set; }
+        public static Page CameraModePage { get; private set; } 
+        public static BoolElement Ele_LookAtPlayer { get; private set; }
         public static Page SupportPage { get; private set; }
 
         public static Page LensDistortionPage { get; private set; }
@@ -58,15 +64,13 @@ namespace WideEye
 
         public static void SetupBoneMenu()
         {
-
-            //Menu.DestroyPage(mainPage);
             mainPage = Page.Root.CreatePage("Wide Eye", Color.white);
             fovSlider = mainPage.CreateFloat("FOV", Color.cyan, 72, 1, float.MinValue, float.MaxValue, (value) => ApplyFOV(value));
             mainPage.Add(new FunctionElement("Reset To Default", Color.red, () => ResetToDefault(ResetType.Fov)));
             mainPage.Add(new FunctionElement("Save Preferences", Color.green, SavePref));
 
             PostFXPage = mainPage.CreatePage("Post-Processing", Color.yellow);
-            PostFXToogle = PostFXPage.CreateBool("Enabled", Color.yellow, true, (value) => ApplyOther(PostFXEnabled : value));
+            PostFXToogle = PostFXPage.CreateBool("Enabled", Color.yellow, true, (value) => ApplyOther(OtherType.PostFX, value)) ;
 
             LensDistortionPage = PostFXPage.CreatePage("Lens Distortion", Color.white);
             LD_Enabled = LensDistortionPage.CreateBool("Enabled", Color.white, true, (value) => ApplyLD());
@@ -97,9 +101,9 @@ namespace WideEye
 
             OffsetPage = mainPage.CreatePage("Offset", Color.white);
             RotationOffsetPage = OffsetPage.CreatePage("Rotation Offset", Color.white);
-            X_R_Offset = RotationOffsetPage.CreateFloat("X Rotation Offset", Color.red, 11, 0.1f, float.MinValue, float.MaxValue, (value) => ApplyOffset(OffsetType.Rotation));
-            Y_R_Offset = RotationOffsetPage.CreateFloat("Y Rotation Offset", Color.green, 0, 0.1f, float.MinValue, float.MaxValue, (value) => ApplyOffset(OffsetType.Rotation));
-            Z_R_Offset = RotationOffsetPage.CreateFloat("Z Rotation Offset", Color.blue, 0, 0.1f, float.MinValue, float.MaxValue, (value) => ApplyOffset(OffsetType.Rotation));
+            X_R_Offset = RotationOffsetPage.CreateFloat("X Rotation Offset", Color.red, 11, 1, float.MinValue, float.MaxValue, (value) => ApplyOffset(OffsetType.Rotation));
+            Y_R_Offset = RotationOffsetPage.CreateFloat("Y Rotation Offset", Color.green, 0, 1, float.MinValue, float.MaxValue, (value) => ApplyOffset(OffsetType.Rotation));
+            Z_R_Offset = RotationOffsetPage.CreateFloat("Z Rotation Offset", Color.blue, 0, 1, float.MinValue, float.MaxValue, (value) => ApplyOffset(OffsetType.Rotation));
             RotationOffsetPage.CreateFunction("Reset To Default", Color.red, () => ResetToDefault(ResetType.RotationOffset));
 
             PositionOffsetPage = OffsetPage.CreatePage("Position Offset", Color.white);
@@ -109,13 +113,18 @@ namespace WideEye
             PositionOffsetPage.Add(new FunctionElement("Reset To Default", Color.red, () => ResetToDefault(ResetType.PostionOffset)));
 
             SmoothingPage = mainPage.CreatePage("Smoothing", Color.white);
-            P_Smoothing = SmoothingPage.CreateFloat("Position Smoothing", Color.white, 0.7f, 0.1f, float.MinValue, int.MaxValue, (value) => ApplySmoothing());
-            R_Smoothing = SmoothingPage.CreateFloat("Rotation Smoothing", Color.white, 0, 0.1f, float.MinValue, int.MaxValue, (value) => ApplySmoothing());
+            P_Smoothing = SmoothingPage.CreateFloat("Position Smoothing", Color.white, 0, 1f, float.MinValue, int.MaxValue, (value) => ApplySmoothing());
+            R_Smoothing = SmoothingPage.CreateFloat("Rotation Smoothing", Color.white, 0, 1f, float.MinValue, int.MaxValue, (value) => ApplySmoothing());
             SmoothingPage.Add(new FunctionElement("Reset To Default", Color.red, () => ResetToDefault(ResetType.Smoothing)));
 
+            CameraModePage = mainPage.CreatePage("Camera Mode", Color.white);
+            CameraModePage.Add(new EnumElement("Camera Mode", Color.white, CameraMode.Head, value => ApplyCameraMode((CameraMode)value)));
+            Ele_LookAtPlayer = CameraModePage.CreateBool("Look At Player", Color.white, false, value => LookAtPlayer = value);
+            CameraModePage.Add(new EnumElement("Look At :", Color.white, LookAtPositionType.Head, value => ApplyLookAtTransform((LookAtPositionType)value)));
+
             OtherPage = mainPage.CreatePage("Other", Color.gray);
-            OtherPage.Add(new BoolElement("Pin Camera", Color.yellow, false, (value) => ApplyOther(PinCamera : value)));
-            OtherPage.Add(new BoolElement("Head Meshs", Color.yellow, true, (value) => ApplyOther(HeadMesh : value)));
+            OtherPage.Add(new BoolElement("Head Meshes", Color.yellow, true, (value) => ApplyOther(OtherType.HeadMesh, value)));
+            OtherPage.Add(new BoolElement("Hair Meshes", Color.yellow, true, (value) => ApplyOther(OtherType.HairMeshes, value)));
             OtherPage.Add(new FunctionElement("Reset All To Default", Color.red, () => ResetToDefault(ResetType.All)));
             OtherPage.Add(new FunctionElement("Load Preferences", Color.green, LoadPref));
             OtherPage.Add(new FunctionElement("Clear All Preferences", Color.red, ClearPref));
@@ -124,13 +133,13 @@ namespace WideEye
             SupportPage.Add(new FunctionElement("Open GitHub Issues", Color.white, () =>
             {
                 Application.OpenURL("https://github.com/HL2H0/WideEye/issues");
-                SendNotfi("Success", "Opened the GitHub issues page for WideEye On Desktop", NotificationType.Success, 2, true);
+                SendNotfi("WideEye | Success", "Opened the GitHub issues page for WideEye On Desktop", NotificationType.Success, 2, true);
             }));
 
             SupportPage.Add(new FunctionElement("Discord", Color.blue, () =>
             {
                 GUIUtility.systemCopyBuffer = "@hiiiiiiiiiiiiiiiiii";
-                SendNotfi("Success", "Copied Username to clipboard", NotificationType.Success, 3, true);
+                SendNotfi("WideEye | Success", "Copied Username to clipboard", NotificationType.Success, 3, true);
             }));
 
             SupportPage.Add(new FunctionElement("Version : 2.0.0", Color.white, null));

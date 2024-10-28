@@ -1,5 +1,6 @@
-﻿using BoneLib.BoneMenu;
-using Page = BoneLib.BoneMenu.Page;
+﻿using System.Collections;
+
+using BoneLib.BoneMenu;
 using BoneLib;
 using BoneLib.Notifications;
 
@@ -10,13 +11,11 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-using System.Collections;
-
 using Il2CppOccaSoftware.Exposure.Runtime;
 
 using static WideEye.MenuSetup;
 using static WideEye.ModPreferences;
-using Il2CppTMPro;
+using Il2CppSLZ.Marrow;
 
 [assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "2.0.0", "HL2H0", null)]
 [assembly: MelonGame("Stress Level Zero", "BONELAB")]
@@ -34,12 +33,14 @@ namespace WideEye
     {
         //Needed GameObjects and Components
 
-        private static GameObject SC_GameObject;
-        private static GameObject ST_GameObject;
-        private static Camera SC_CameraComponent;
-        private static SmoothFollower SC_SmootherComponent;
-        private static Transform ST_Transform;
-        private static Volume SC_VolumeComponent;
+        public static PlayerAvatarArt RM_playerArtComponent;
+
+        public static GameObject SC_GameObject;
+        public static GameObject ST_GameObject;
+        public static Camera SC_CameraComponent;
+        public static SmoothFollower SC_SmootherComponent;
+        public static Transform ST_Transform;
+        public static Volume SC_VolumeComponent;
 
 
 
@@ -48,42 +49,22 @@ namespace WideEye
         private static ChromaticAberration chromaticAberrationOverride;
         private static AutoExposure autoExposureOverride;
 
-        //Variables
+        //Enums
 
         public enum OffsetType { Position, Rotation }
         public enum ResetType { Fov, Smoothing, RotationOffset, PostionOffset, LensDistortion, ChromaticAberration, AutoExposure, All }
         public enum PostFXType { LensDistortion, ChromaticAberration, AutoExposure }
+        public enum CameraMode { Head, Pinned }
+        public enum LookAtPositionType { RightHand, LeftHand, Head }
+        public enum OtherType { HairMeshes, HeadMesh, PostFX };
+
+        //Variables
+        public static Transform LookAtTransform;
+        public static CameraMode cameraMode = CameraMode.Head;
+        public static bool LookAtPlayer = false;
         private static bool gotcamera = false;
 
-        //MelonLoader Event
-
-        public override void OnInitializeMelon()
-        {
-            CreatePref();
-            SetupBoneMenu();
-            Menu.OnPageOpened += OnPageOpened;
-            Hooking.OnLevelUnloaded += BoneLib_OnLevelUnloaded;
-            Hooking.OnUIRigCreated += BoneLib_OnUIRigCreated;
-            LoggerInstance.Msg("WideEye 2.0.0 Has Been Initialized.");
-        }
-
-        private void BoneLib_OnUIRigCreated()  
-        {
-            MelonCoroutines.Start(WaitForCameraRig());
-            MelonLogger.Msg(System.ConsoleColor.Green, "UI Rig Created, Trying To Get Camera...");
-        }
-
-        private void BoneLib_OnLevelUnloaded()
-        {
-            gotcamera = false;
-        }
-
-        private static IEnumerator WaitForCameraRig()
-        {
-            yield return new WaitForSeconds(5f);
-            GetTargetCamera(true);
-        }
-
+        //Method made for makeing things easier
         public static void SendNotfi(string Title, string Message, NotificationType Type, float PopupLength, bool showTitleOnPopup)
         {
             var notfi = new Notification
@@ -97,51 +78,104 @@ namespace WideEye
             Notifier.Send(notfi);
         }
 
+        //MelonLoader & BoneLib Events
 
-        //"Get" Methods
+        public override void OnInitializeMelon()
+        {
+            CreatePref();
+            SetupBoneMenu();
+            Hooking.OnLevelUnloaded += BoneLib_OnLevelUnloaded;
+            Hooking.OnUIRigCreated += BoneLib_OnUIRigCreated;
+            LoggerInstance.Msg("WideEye 2.0.0 Has Been Initialized.");
+        }
+
+        private void BoneLib_OnUIRigCreated()  
+        {
+            MelonCoroutines.Start(WaitForCameraRig());
+            MelonLogger.Msg(System.ConsoleColor.Green, "UI Rig Created, Trying To Get Camera...");
+        }
+
+        private void BoneLib_OnLevelUnloaded()
+        {
+            cameraMode = CameraMode.Head;
+            gotcamera = false;
+            LookAtPlayer = false;
+            Ele_LookAtPlayer.Value = false;
+        }
+
+        public override void OnUpdate()
+        {
+            base.OnUpdate();
+            if (LookAtPlayer && cameraMode == CameraMode.Pinned && gotcamera)
+            {
+                SC_GameObject.transform.LookAt(LookAtTransform);
+            }
+        }
+
+        
+
+        //Methods to ensure everything is collected
+        private static IEnumerator WaitForCameraRig()
+        {
+            yield return new WaitForSeconds(5f);
+            GetTargetCamera(true);
+        }
 
         public static void GetTargetCamera(bool isAuto)
         {
-            SC_GameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
-            ST_GameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
-
-            if (SC_GameObject == null || ST_GameObject == null)
+            if (HelperMethods.IsAndroid())
             {
-                if (isAuto)
-                {
-                    SendNotfi("Error", "Couldn't find the camera automatically.\nPlease open WideEye's menu and find it manually.", NotificationType.Error, 3, true);
-                    MelonLogger.Error("Couldn't find the camera automatically");
-                }
-                else
-                {
-                    SendNotfi("Error", "Couldn't find the camera.", NotificationType.Error, 3, true);
-                    MelonLogger.Error("Couldn't find the camera");
-                }
-                
+                SendNotfi("WideEye | Error", "WideEye doesn't work with Android", NotificationType.Error, 3f, true);
             }
-            else if (!gotcamera)
+            else
             {
-                if (!SC_GameObject.active)
+                SC_GameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
+                ST_GameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
+
+                if (SC_GameObject == null || ST_GameObject == null)
                 {
-                    SendNotfi("Warning", "Spectator Camera Is Not Active.\nModifications will not take action.", NotificationType.Warning, 5, true);
-                    MelonLogger.Warning("Spectator Camera Is Not Active. Modifications will not take action.");
+                    if (isAuto)
+                    {
+                        SendNotfi("WideEye | Error", "Couldn't find the camera automatically.\nPlease open WideEye's menu and find it manually.", NotificationType.Error, 3, true);
+                        MelonLogger.Error("Couldn't find the camera automatically");
+                        mainPage.Add(GetCameraButton);
+                    }
+                    else
+                    {
+                        SendNotfi("WideEye | Error", "Couldn't find the camera.", NotificationType.Error, 3, true);
+                        MelonLogger.Error("Couldn't find the camera");
+                    }
+
                 }
-                ST_Transform = ST_GameObject.GetComponent<Transform>();
-                SC_SmootherComponent = SC_GameObject.GetComponent<SmoothFollower>();
-                SC_VolumeComponent = SC_GameObject.GetComponent<Volume>();
-                SC_CameraComponent = SC_GameObject.GetComponent<Camera>();
-                GetPostFXOverrides();
-                LoadPref();
-                gotcamera = true;
-                if (isAuto)
+                else if (!gotcamera)
                 {
-                    SendNotfi("Scusses", "Found camera automatically", NotificationType.Success, 3, true);
-                    MelonLogger.Msg(System.ConsoleColor.Green, "Found camera automatically");
-                }
-                else
-                {
-                    SendNotfi("Scusses", "Found camera manually", NotificationType.Success, 2, true);
-                    MelonLogger.Msg(System.ConsoleColor.Green, "Found camera manually");
+                    if (!SC_GameObject.active)
+                    {
+                        SendNotfi("WideEye | Warning", "Spectator Camera Is Not Active.\nModifications will not take action.", NotificationType.Warning, 5, true);
+                        MelonLogger.Warning("Spectator Camera Is Not Active. Modifications will not take action.");
+                    }
+
+                    RM_playerArtComponent = Player.ControllerRig.gameObject.GetComponent<PlayerAvatarArt>();
+                    ST_Transform = ST_GameObject.GetComponent<Transform>();
+                    SC_SmootherComponent = SC_GameObject.GetComponent<SmoothFollower>();
+                    SC_VolumeComponent = SC_GameObject.GetComponent<Volume>();
+                    SC_CameraComponent = SC_GameObject.GetComponent<Camera>();
+                    GetPostFXOverrides();
+                    if (isAuto)
+                    {
+                        SendNotfi("WideEye | Scusses", "Found camera automatically", NotificationType.Success, 3, true);
+                        MelonLogger.Msg(System.ConsoleColor.Green, "Found camera automatically");
+                    }
+                    else
+                    {
+                        mainPage.Remove(GetCameraButton);
+                        SendNotfi("WideEye | Scusses", "Found camera manually", NotificationType.Success, 2, true);
+                        MelonLogger.Msg(System.ConsoleColor.Green, "Found camera manually");
+                    }
+                    
+                    LoadPref();
+                    gotcamera = true;
+                    LookAtTransform = Player.Head.transform;
                 }
             }
         }
@@ -150,19 +184,10 @@ namespace WideEye
         {
             SC_VolumeComponent.profile.TryGet(out LensDistortionOverride);
             SC_VolumeComponent.profile.TryGet(out chromaticAberrationOverride);
-            SC_VolumeComponent.profile.TryGet(out autoExposureOverride);
+            SC_VolumeComponent.profile.TryGet(out autoExposureOverride);        
         }
 
-        //"Apply Methodsw"
-
-        public static void ApplyFOV(float fov, bool SyncElementValue = false, FloatElement FovEle =null)
-        {
-            SC_CameraComponent.fieldOfView = fov;
-            if (SyncElementValue)
-            {
-                FovEle.Value = fov;
-            }
-        }
+        //"Apply Methods"
 
         public static void ResetToDefault(ResetType resetType)
         {
@@ -211,26 +236,71 @@ namespace WideEye
 
         }
 
-        public static void ApplyOther(bool PostFXEnabled = true, bool PinCamera = false, bool SyncElements = false, bool HeadMesh = true)
+        public static void ApplyCameraMode(CameraMode mode)
         {
-            foreach(var mesh in Player.RigManager.avatar.headMeshes)
+            cameraMode = mode;
+            switch (mode)
             {
-                mesh.enabled = HeadMesh;
+                case CameraMode.Head:
+                    
+                    SC_SmootherComponent.enabled = true;
+                    LookAtPlayer = false;
+                    Ele_LookAtPlayer.Value = false;
+                    break;
+                case CameraMode.Pinned:
+                    SC_SmootherComponent.enabled = false;
+                    break;
+            }
+        }
+
+        public static void ApplyLookAtTransform(LookAtPositionType type)
+        {
+            switch (type)
+            {
+                case LookAtPositionType.Head:
+                    LookAtTransform = Player.Head.transform;
+                    break;
+                case LookAtPositionType.RightHand:
+                    LookAtTransform = Player.RightHand.transform;
+                    break;
+                case LookAtPositionType.LeftHand:
+                    LookAtTransform = Player.LeftHand.transform;
+                    break;
+            };
+        }
+
+        public static void ApplyFOV(float fov, bool SyncElementValue = false, FloatElement FovEle = null)
+        {
+            SC_CameraComponent.fieldOfView = fov;
+            if (SyncElementValue)
+            {
+                FovEle.Value = fov;
+            }
+        }
+
+        public static void ApplyOther(OtherType type, bool value, bool syncElemnent = false)
+        {
+            switch(type)
+            {
+                case OtherType.PostFX:
+                    SC_VolumeComponent.enabled = value;
+                    break;
+                case OtherType.HeadMesh:
+                    if (value == false) RM_playerArtComponent.DisableHead();
+                    else RM_playerArtComponent.EnableHead();
+                    foreach(var mesh in Player.Avatar.headMeshes) mesh.enabled = value;
+                    break;
+
+                case OtherType.HairMeshes:
+                    if (value == false) RM_playerArtComponent.DisableHair();
+                    else RM_playerArtComponent.EnableHair();
+                    foreach (var mesh in Player.Avatar.hairMeshes) mesh.enabled = value;
+                    break;
             }
             
-
-            SC_VolumeComponent.enabled =  PostFXEnabled;
-            if (PinCamera)
+            if (syncElemnent)
             {
-                SC_SmootherComponent.enabled = false;
-            }
-            else
-            {
-                SC_SmootherComponent.enabled = true;
-            }   
-            if (SyncElements)
-            {
-                PostFXToogle.Value = PostFXEnabled;
+                PostFXToogle.Value = value;
             }
 
         }
@@ -362,14 +432,6 @@ namespace WideEye
         {
             SC_SmootherComponent.RotationalSmoothTime = R_Smoothing.Value;
             SC_SmootherComponent.TranslationSmoothTime = P_Smoothing.Value;
-        }
-
-        public static void OnPageOpened(Page page)
-        {
-            if (page == RotationOffsetPage & page == PositionOffsetPage & page == SmoothingPage & !gotcamera)
-            {
-                Menu.DisplayDialog("Warning", "Page Is Empty Because The Camera Is Not Found.", Dialog.WarningIcon, () => Menu.OpenPage(mainPage));
-            }
         }
     }
 }
