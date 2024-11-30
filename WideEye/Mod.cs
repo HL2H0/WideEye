@@ -17,7 +17,7 @@ using static WideEye.MenuSetup;
 using static WideEye.ModPreferences;
 using Il2CppSLZ.Marrow;
 
-[assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "2.0.0", "HL2H0", null)]
+[assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "2.1.0", "HL2H0")]
 [assembly: MelonGame("Stress Level Zero", "BONELAB")]
 
 namespace WideEye
@@ -25,7 +25,7 @@ namespace WideEye
     public static class BuildInfo
     {
         public const string Name = "WideEye";
-        public const string Version = "2.0.0";
+        public const string Version = "2.1.0";
         public const string Author = "HL2H0";
     }
 
@@ -33,49 +33,49 @@ namespace WideEye
     {
         //Needed GameObjects and Components
 
-        public static PlayerAvatarArt RM_playerArtComponent;
+        private static PlayerAvatarArt _rmPlayerArtComponent;
 
-        public static GameObject SC_GameObject;
-        public static GameObject ST_GameObject;
-        public static Camera SC_CameraComponent;
-        public static SmoothFollower SC_SmootherComponent;
-        public static Transform ST_Transform;
-        public static Volume SC_VolumeComponent;
+        private static GameObject _scGameObject;
+        private static GameObject _stGameObject;
+        private static Camera _scCameraComponent;
+        private static SmoothFollower _scSmootherComponent;
+        private static Transform _stTransform;
+        private static Volume _scVolumeComponent;
 
 
 
         //Post-FX Overrides
-        private static LensDistortion LensDistortionOverride;
-        private static ChromaticAberration chromaticAberrationOverride;
-        private static AutoExposure autoExposureOverride;
+        private static LensDistortion _lensDistortionOverride;
+        private static ChromaticAberration _chromaticAberrationOverride;
+        private static AutoExposure _autoExposureOverride;
 
         //Enums
 
         public enum OffsetType { Position, Rotation }
-        public enum ResetType { Fov, Smoothing, RotationOffset, PostionOffset, LensDistortion, ChromaticAberration, AutoExposure, All }
+        public enum ResetType { Fov, Smoothing, RotationOffset, PositionOffset, LensDistortion, ChromaticAberration, AutoExposure, All }
         public enum PostFXType { LensDistortion, ChromaticAberration, AutoExposure }
-        public enum CameraMode { Head, Pinned }
+        public enum CameraModeType { Head, Pinned }
         public enum LookAtPositionType { RightHand, LeftHand, Head }
         public enum OtherType { HairMeshes, HeadMesh, PostFX };
 
         //Variables
-        public static Transform LookAtTransform;
-        public static CameraMode cameraMode = CameraMode.Head;
-        public static bool LookAtPlayer = false;
-        private static bool gotcamera = false;
+        private static Transform _lookAtTransform;
+        private static CameraModeType _cameraMode = CameraModeType.Head;
+        public static bool LookAtPlayer;
+        private static bool _foundCamera;
 
-        //Method made for makeing things easier
-        public static void SendNotfi(string Title, string Message, NotificationType Type, float PopupLength, bool showTitleOnPopup)
+        //Method made for making things easier
+        public static void SendNotification(string title, string message, NotificationType type, float popupLength, bool showTitleOnPopup)
         {
-            var notfi = new Notification
+            var notification = new Notification
             {
-                Title = Title,
-                Message = Message,
-                Type = Type,
-                PopupLength = PopupLength,
+                Title = title,
+                Message = message,
+                Type = type,
+                PopupLength = popupLength,
                 ShowTitleOnPopup = showTitleOnPopup
             };
-            Notifier.Send(notfi);
+            Notifier.Send(notification);
         }
 
         //MelonLoader & BoneLib Events
@@ -97,18 +97,18 @@ namespace WideEye
 
         private void BoneLib_OnLevelUnloaded()
         {
-            cameraMode = CameraMode.Head;
-            gotcamera = false;
+            _cameraMode = CameraModeType.Head;
+            _foundCamera = false;
             LookAtPlayer = false;
-            Ele_LookAtPlayer.Value = false;
+            EleLookAtPlayer.Value = false;
         }
 
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if (LookAtPlayer && cameraMode == CameraMode.Pinned && gotcamera)
+            if (LookAtPlayer && _cameraMode == CameraModeType.Pinned && _foundCamera)
             {
-                SC_GameObject.transform.LookAt(LookAtTransform);
+                _scGameObject.transform.LookAt(_lookAtTransform);
             }
         }
 
@@ -125,66 +125,66 @@ namespace WideEye
         {
             if (HelperMethods.IsAndroid())
             {
-                SendNotfi("WideEye | Error", "WideEye doesn't work with Android", NotificationType.Error, 3f, true);
+                SendNotification("WideEye | Error", "WideEye doesn't work with Android", NotificationType.Error, 3f, true);
             }
             else
             {
-                SC_GameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
-                ST_GameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
+                _scGameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
+                _stGameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
 
-                if (SC_GameObject == null || ST_GameObject == null)
+                if (_scGameObject == null || _stGameObject == null)
                 {
                     if (isAuto)
                     {
-                        SendNotfi("WideEye | Error", "Couldn't find the camera automatically.\nPlease open WideEye's menu and find it manually.", NotificationType.Error, 3, true);
+                        SendNotification("WideEye | Error", "Couldn't find the camera automatically.\nPlease open WideEye's menu and find it manually.", NotificationType.Error, 3, true);
                         MelonLogger.Error("Couldn't find the camera automatically");
-                        mainPage.Add(GetCameraButton);
+                        MainPage.Add(GetCameraButton);
                     }
                     else
                     {
-                        SendNotfi("WideEye | Error", "Couldn't find the camera.", NotificationType.Error, 3, true);
+                        SendNotification("WideEye | Error", "Couldn't find the camera.", NotificationType.Error, 3, true);
                         MelonLogger.Error("Couldn't find the camera");
                     }
 
                 }
-                else if (!gotcamera)
+                else if (!_foundCamera)
                 {
-                    if (!SC_GameObject.active)
+                    if (!_scGameObject.active)
                     {
-                        SendNotfi("WideEye | Warning", "Spectator Camera Is Not Active.\nModifications will not take action.", NotificationType.Warning, 5, true);
+                        SendNotification("WideEye | Warning", "Spectator Camera Is Not Active.\nModifications will not take action.", NotificationType.Warning, 5, true);
                         MelonLogger.Warning("Spectator Camera Is Not Active. Modifications will not take action.");
                     }
 
-                    RM_playerArtComponent = Player.ControllerRig.gameObject.GetComponent<PlayerAvatarArt>();
-                    ST_Transform = ST_GameObject.GetComponent<Transform>();
-                    SC_SmootherComponent = SC_GameObject.GetComponent<SmoothFollower>();
-                    SC_VolumeComponent = SC_GameObject.GetComponent<Volume>();
-                    SC_CameraComponent = SC_GameObject.GetComponent<Camera>();
+                    _rmPlayerArtComponent = Player.ControllerRig.gameObject.GetComponent<PlayerAvatarArt>();
+                    _stTransform = _stGameObject.GetComponent<Transform>();
+                    _scSmootherComponent = _scGameObject.GetComponent<SmoothFollower>();
+                    _scVolumeComponent = _scGameObject.GetComponent<Volume>();
+                    _scCameraComponent = _scGameObject.GetComponent<Camera>();
                     GetPostFXOverrides();
                     if (isAuto)
                     {
-                        SendNotfi("WideEye | Scusses", "Found camera automatically", NotificationType.Success, 3, true);
+                        SendNotification("WideEye | Success", "Found camera automatically", NotificationType.Success, 3, true);
                         MelonLogger.Msg(System.ConsoleColor.Green, "Found camera automatically");
                     }
                     else
                     {
-                        mainPage.Remove(GetCameraButton);
-                        SendNotfi("WideEye | Scusses", "Found camera manually", NotificationType.Success, 2, true);
+                        MainPage.Remove(GetCameraButton);
+                        SendNotification("WideEye | Success", "Found camera manually", NotificationType.Success, 2, true);
                         MelonLogger.Msg(System.ConsoleColor.Green, "Found camera manually");
                     }
                     
                     LoadPref();
-                    gotcamera = true;
-                    LookAtTransform = Player.Head.transform;
+                    _foundCamera = true;
+                    _lookAtTransform = Player.Head.transform;
                 }
             }
         }
 
-        public static void GetPostFXOverrides()
+        private static void GetPostFXOverrides()
         {
-            SC_VolumeComponent.profile.TryGet(out LensDistortionOverride);
-            SC_VolumeComponent.profile.TryGet(out chromaticAberrationOverride);
-            SC_VolumeComponent.profile.TryGet(out autoExposureOverride);        
+            _scVolumeComponent.profile.TryGet(out _lensDistortionOverride);
+            _scVolumeComponent.profile.TryGet(out _chromaticAberrationOverride);
+            _scVolumeComponent.profile.TryGet(out _autoExposureOverride);        
         }
 
         //"Apply Methods"
@@ -194,7 +194,7 @@ namespace WideEye
             switch (resetType)
             {
                 case ResetType.Fov:
-                    ApplyFOV(75, true, fovSlider);
+                    ApplyFOV(75, true, FOVSlider);
                     break;
 
                 case ResetType.Smoothing:
@@ -202,53 +202,53 @@ namespace WideEye
                     break;
 
                 case ResetType.RotationOffset:
-                    ApplyOffset(new(11, 0, 0), OffsetType.Rotation, true, X_R_Offset, Y_R_Offset, Z_R_Offset);
+                    ApplyOffset(new(11, 0, 0), OffsetType.Rotation, true, XROffset, YrOffset, ZrOffset);
                     break;
                 
-                case ResetType.PostionOffset:
-                    ApplyOffset(new(0, 0, 0), OffsetType.Position, true, X_P_Offset, Y_P_Offset, Z_P_Offset);
+                case ResetType.PositionOffset:
+                    ApplyOffset(new(0, 0, 0), OffsetType.Position, true, XpOffset, YpOffset, ZpOffset);
                     break;
 
                 case ResetType.LensDistortion:
-                    ApplyLD(true, new Vector2(0.5f, 0.5f), 0.48f, 1, 0.59f, 1, true);
+                    ApplyLd(true, new Vector2(0.5f, 0.5f), 0.48f, 1, 0.59f, 1, true);
                     break;
 
                 case ResetType.ChromaticAberration:
-                    ApplyCA(true, 0.123f, true);
+                    ApplyCa(true, 0.123f, true);
                     break;
 
                 case ResetType.AutoExposure:
-                    ApplyAE(true, AutoExposureAdaptationMode.Progressive, 3, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2, true);
+                    ApplyAe(true, AutoExposureAdaptationMode.Progressive, 3, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2, true);
                     break;
 
                 case ResetType.All:
-                    ApplyFOV(75, true, fovSlider);
+                    ApplyFOV(75, true, FOVSlider);
                     ApplySmoothing(0, 0, true);
-                    ApplyOffset(new(11, 0, 0), OffsetType.Rotation, true, X_R_Offset, Y_R_Offset, Z_R_Offset);
-                    ApplyOffset(new(0, 0, 0), OffsetType.Position, true, X_P_Offset, Y_P_Offset, Z_P_Offset);
-                    ApplyLD(true, new Vector2(0.5f, 0.5f), 0.48f, 1, 0.59f, 1, true);
-                    ApplyCA(true, 0.123f, true);
-                    ApplyAE(true, AutoExposureAdaptationMode.Progressive, 3, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2, true);
-                    SC_VolumeComponent.enabled = true;
-                    PostFXToogle.Value = true;
+                    ApplyOffset(new(11, 0, 0), OffsetType.Rotation, true, XROffset, YrOffset, ZrOffset);
+                    ApplyOffset(new(0, 0, 0), OffsetType.Position, true, XpOffset, YpOffset, ZpOffset);
+                    ApplyLd(true, new Vector2(0.5f, 0.5f), 0.48f, 1, 0.59f, 1, true);
+                    ApplyCa(true, 0.123f, true);
+                    ApplyAe(true, AutoExposureAdaptationMode.Progressive, 3, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2, true);
+                    _scVolumeComponent.enabled = true;
+                    PostFXToggle.Value = true;
                     break;
             }
 
         }
 
-        public static void ApplyCameraMode(CameraMode mode)
+        public static void ApplyCameraMode(CameraModeType modeType)
         {
-            cameraMode = mode;
-            switch (mode)
+            _cameraMode = modeType;
+            switch (modeType)
             {
-                case CameraMode.Head:
-                    
-                    SC_SmootherComponent.enabled = true;
+                case CameraModeType.Head:
+                    _scSmootherComponent.enabled = true;
                     LookAtPlayer = false;
-                    Ele_LookAtPlayer.Value = false;
+                    EleLookAtPlayer.Value = false;
                     break;
-                case CameraMode.Pinned:
-                    SC_SmootherComponent.enabled = false;
+                
+                case CameraModeType.Pinned:
+                    _scSmootherComponent.enabled = false;
                     break;
             }
         }
@@ -258,70 +258,68 @@ namespace WideEye
             switch (type)
             {
                 case LookAtPositionType.Head:
-                    LookAtTransform = Player.Head.transform;
+                    _lookAtTransform = Player.Head.transform;
                     break;
                 case LookAtPositionType.RightHand:
-                    LookAtTransform = Player.RightHand.transform;
+                    _lookAtTransform = Player.RightHand.transform;
                     break;
                 case LookAtPositionType.LeftHand:
-                    LookAtTransform = Player.LeftHand.transform;
+                    _lookAtTransform = Player.LeftHand.transform;
                     break;
-            };
-        }
-
-        public static void ApplyFOV(float fov, bool SyncElementValue = false, FloatElement FovEle = null)
-        {
-            SC_CameraComponent.fieldOfView = fov;
-            if (SyncElementValue)
-            {
-                FovEle.Value = fov;
             }
         }
 
-        public static void ApplyOther(OtherType type, bool value, bool syncElemnent = false)
+        public static void ApplyFOV(float fov, bool syncElementValue = false, FloatElement fovEle = null)
+        {
+            _scCameraComponent.fieldOfView = fov;
+            if (!syncElementValue) return;
+            if (fovEle != null) fovEle.Value = fov;
+        }
+
+        public static void ApplyOther(OtherType type, bool value, bool syncElement = false)
         {
             switch(type)
             {
                 case OtherType.PostFX:
-                    SC_VolumeComponent.enabled = value;
+                    _scVolumeComponent.enabled = value;
                     break;
                 case OtherType.HeadMesh:
-                    if (value == false) RM_playerArtComponent.DisableHead();
-                    else RM_playerArtComponent.EnableHead();
+                    if (value == false) _rmPlayerArtComponent.DisableHead();
+                    else _rmPlayerArtComponent.EnableHead();
                     foreach(var mesh in Player.Avatar.headMeshes) mesh.enabled = value;
                     break;
 
                 case OtherType.HairMeshes:
-                    if (value == false) RM_playerArtComponent.DisableHair();
-                    else RM_playerArtComponent.EnableHair();
+                    if (value == false) _rmPlayerArtComponent.DisableHair();
+                    else _rmPlayerArtComponent.EnableHair();
                     foreach (var mesh in Player.Avatar.hairMeshes) mesh.enabled = value;
                     break;
             }
             
-            if (syncElemnent)
+            if (syncElement)
             {
-                PostFXToogle.Value = value;
+                PostFXToggle.Value = value;
             }
 
         }
 
-        public static void ApplyOffset(Vector3 Offset, OffsetType offsetType, bool SyncElementValue = false, FloatElement EleX = null, FloatElement EleY = null, FloatElement EleZ = null)
+        public static void ApplyOffset(Vector3 offset, OffsetType offsetType, bool syncElementValue = false, FloatElement eleX = null, FloatElement eleY = null, FloatElement eleZ = null)
         { 
             switch (offsetType)
             {
                 case OffsetType.Position:
-                    ST_Transform.localPosition = Offset;
+                    _stTransform.localPosition = offset;
                     break;
 
                 case OffsetType.Rotation:
-                    ST_Transform.localRotation = Quaternion.Euler(Offset);
+                    _stTransform.localRotation = Quaternion.Euler(offset);
                     break;
             }
-            if (SyncElementValue)
+            if (syncElementValue)
             {
-                EleX.Value = Offset.x;
-                EleY.Value = Offset.y;
-                EleZ.Value = Offset.z;
+                if (eleX != null) eleX.Value = offset.x;
+                if (eleY != null) eleY.Value = offset.y;
+                if (eleZ != null) eleZ.Value = offset.z;
             }
         }
         public static void ApplyOffset(OffsetType type)
@@ -329,109 +327,106 @@ namespace WideEye
             switch (type)
             {
                 case OffsetType.Rotation:
-                    ST_Transform.localRotation = Quaternion.Euler(X_R_Offset.Value, Y_R_Offset.Value, Z_R_Offset.Value);
+                    _stTransform.localRotation = Quaternion.Euler(XROffset.Value, YrOffset.Value, ZrOffset.Value);
                     break;
                 case OffsetType.Position:
-                    ST_Transform.localPosition = new(X_P_Offset.Value, Y_P_Offset.Value, Z_P_Offset.Value);
+                    _stTransform.localPosition = new(XpOffset.Value, YpOffset.Value, ZpOffset.Value);
                     break;
             }
         }
-        public static void ApplyLD(bool Enabled, Vector2 Center, float Intensity, float Scale, float xMulti, float yMulti, bool SyncElements)
+        public static void ApplyLd(bool enabled, Vector2 center, float intensity, float scale, float xMulti, float yMulti, bool syncElements)
         {
-            LensDistortionOverride.active = Enabled;
-            LensDistortionOverride.center.value = Center;
-            LensDistortionOverride.intensity.value = Intensity;
-            LensDistortionOverride.scale.value = Scale;
-            LensDistortionOverride.xMultiplier.value = xMulti;
-            LensDistortionOverride.yMultiplier.value = yMulti;
-            if (SyncElements)
+            _lensDistortionOverride.active = enabled;
+            _lensDistortionOverride.center.value = center;
+            _lensDistortionOverride.intensity.value = intensity;
+            _lensDistortionOverride.scale.value = scale;
+            _lensDistortionOverride.xMultiplier.value = xMulti;
+            _lensDistortionOverride.yMultiplier.value = yMulti;
+            if (syncElements)
             {
-                LD_Enabled.Value = Enabled;
-                LD_CenterX.Value = Center.x;
-                LD_CenterY.Value = Center.y;
-                LD_Intensity.Value = Intensity;
-                LD_Scale.Value = Scale;
-                LD_xMultiplier.Value = xMulti;
-                LD_yMultiplier.Value = yMulti;
+                LdEnabled.Value = enabled;
+                LdCenterX.Value = center.x;
+                LdCenterY.Value = center.y;
+                LdIntensity.Value = intensity;
+                LdScale.Value = scale;
+                LdXMultiplier.Value = xMulti;
+                LdYMultiplier.Value = yMulti;
             }
         }
-        public static void ApplyLD()
+        public static void ApplyLd()
         {
-            LensDistortionOverride.active = LD_Enabled.Value;
-            LensDistortionOverride.center.value = new(LD_CenterX.Value, LD_CenterY.Value);
-            LensDistortionOverride.intensity.value = LD_Intensity.Value;
-            LensDistortionOverride.scale.value = LD_Scale.Value;
-            LensDistortionOverride.xMultiplier.value = LD_xMultiplier.Value;
-            LensDistortionOverride.yMultiplier.value = LD_yMultiplier.Value;
+            _lensDistortionOverride.active = LdEnabled.Value;
+            _lensDistortionOverride.center.value = new(LdCenterX.Value, LdCenterY.Value);
+            _lensDistortionOverride.intensity.value = LdIntensity.Value;
+            _lensDistortionOverride.scale.value = LdScale.Value;
+            _lensDistortionOverride.xMultiplier.value = LdXMultiplier.Value;
+            _lensDistortionOverride.yMultiplier.value = LdYMultiplier.Value;
         }
 
-        public static void ApplyCA(bool Enabled, float Intensity, bool SyncElements)
+        public static void ApplyCa(bool enabled, float intensity, bool syncElements)
         {
-            chromaticAberrationOverride.active = Enabled;
-            chromaticAberrationOverride.intensity.value = Intensity;
-            if(SyncElements)
-            {
-                CA_Enabled.Value = Enabled;
-                CA_Intensity.Value = Intensity;
-            }
+            _chromaticAberrationOverride.active = enabled;
+            _chromaticAberrationOverride.intensity.value = intensity;
+            if (!syncElements) return;
+            CaEnabled.Value = enabled;
+            CaIntensity.Value = intensity;
         }
-        public static void ApplyCA()
+        public static void ApplyCa()
         {
-            chromaticAberrationOverride.active = CA_Enabled.Value;
-            chromaticAberrationOverride.intensity.value = CA_Intensity.Value;
+            _chromaticAberrationOverride.active = CaEnabled.Value;
+            _chromaticAberrationOverride.intensity.value = CaIntensity.Value;
         }
 
-        public static void ApplyAE(bool Enabled, AutoExposureAdaptationMode adaptationMode, float D2LS, float evCompen, float evMax, float evMin, float L2DS, AutoExposureMeteringMaskMode meteringMaskMode, float MeteringProceduralFalloff, bool SyncElements)
+        public static void ApplyAe(bool enabled, AutoExposureAdaptationMode adaptationMode, float d2Ls, float evCompen, float evMax, float evMin, float l2Ds, AutoExposureMeteringMaskMode meteringMaskMode, float meteringProceduralFalloff, bool syncElements)
         {
-            autoExposureOverride.active = Enabled;
-            autoExposureOverride.adaptationMode.value = adaptationMode;
-            autoExposureOverride.darkToLightSpeed.value = D2LS;
-            autoExposureOverride.evCompensation.value = evCompen;
-            autoExposureOverride.evMax.value = evMax;
-            autoExposureOverride.evMin.value = evMin;
-            autoExposureOverride.lightToDarkSpeed.value = L2DS;
-            autoExposureOverride.meteringMaskMode.value = meteringMaskMode;
-            autoExposureOverride.meteringProceduralFalloff.value = MeteringProceduralFalloff;
-            if ( SyncElements )
-            {
-                AE_enabled.Value = Enabled;
-                AE_adaptationMode.Value = adaptationMode;
-                AE_D2LS.Value = D2LS;
-                AE_evCompensation.Value = evCompen;
-                AE_evMax.Value = evMax;
-                AE_evMin.Value = evMin;
-                AE_L2DS.Value = L2DS;
-                AE_MeteringMaskMode.Value = meteringMaskMode;
-                AE_MeteringProceduralFalloff.Value = MeteringProceduralFalloff;
-            }
+            _autoExposureOverride.active = enabled;
+            _autoExposureOverride.adaptationMode.value = adaptationMode;
+            _autoExposureOverride.darkToLightSpeed.value = d2Ls;
+            _autoExposureOverride.evCompensation.value = evCompen;
+            _autoExposureOverride.evMax.value = evMax;
+            _autoExposureOverride.evMin.value = evMin;
+            _autoExposureOverride.lightToDarkSpeed.value = l2Ds;
+            _autoExposureOverride.meteringMaskMode.value = meteringMaskMode;
+            _autoExposureOverride.meteringProceduralFalloff.value = meteringProceduralFalloff;
+            
+            if (!syncElements) return;
+            
+            AeEnabled.Value = enabled;
+            AeAdaptationMode.Value = adaptationMode;
+            AeD2Ls.Value = d2Ls;
+            AeEvCompensation.Value = evCompen;
+            AeEvMax.Value = evMax;
+            AeEvMin.Value = evMin;
+            AeL2Ds.Value = l2Ds;
+            AeMeteringMaskMode.Value = meteringMaskMode;
+            AeMeteringProceduralFalloff.Value = meteringProceduralFalloff;
         }
-        public static void ApplyAE()
+        public static void ApplyAe()
         {
-            autoExposureOverride.active = AE_enabled.Value;
-            autoExposureOverride.adaptationMode.value = (AutoExposureAdaptationMode)AE_adaptationMode.Value;
-            autoExposureOverride.darkToLightSpeed.value = AE_D2LS.Value;
-            autoExposureOverride.evCompensation.value = AE_evCompensation.Value;
-            autoExposureOverride.evMax.value = AE_evMax.Value;
-            autoExposureOverride.evMin.value = AE_evMin.Value;
-            autoExposureOverride.lightToDarkSpeed.value = AE_L2DS.Value;
-            autoExposureOverride.meteringMaskMode.value = (AutoExposureMeteringMaskMode)AE_MeteringMaskMode.Value;
-            autoExposureOverride.meteringProceduralFalloff.value = AE_MeteringProceduralFalloff.Value;
+            _autoExposureOverride.active = AeEnabled.Value;
+            _autoExposureOverride.adaptationMode.value = (AutoExposureAdaptationMode)AeAdaptationMode.Value;
+            _autoExposureOverride.darkToLightSpeed.value = AeD2Ls.Value;
+            _autoExposureOverride.evCompensation.value = AeEvCompensation.Value;
+            _autoExposureOverride.evMax.value = AeEvMax.Value;
+            _autoExposureOverride.evMin.value = AeEvMin.Value;
+            _autoExposureOverride.lightToDarkSpeed.value = AeL2Ds.Value;
+            _autoExposureOverride.meteringMaskMode.value = (AutoExposureMeteringMaskMode)AeMeteringMaskMode.Value;
+            _autoExposureOverride.meteringProceduralFalloff.value = AeMeteringProceduralFalloff.Value;
         }
 
-        public static void ApplySmoothing(float RotationSmoothingValue, float PositionSmoothingValue, bool SyncElementValue)
+        public static void ApplySmoothing(float rotationSmoothingValue, float positionSmoothingValue, bool syncElementValue)
         {
-            SC_SmootherComponent.RotationalSmoothTime = RotationSmoothingValue;
-            SC_SmootherComponent.TranslationSmoothTime = PositionSmoothingValue;
-            if (SyncElementValue)
-            {
-                P_Smoothing.Value = RotationSmoothingValue;
-                R_Smoothing.Value = PositionSmoothingValue;
-            }
+            _scSmootherComponent.RotationalSmoothTime = rotationSmoothingValue;
+            _scSmootherComponent.TranslationSmoothTime = positionSmoothingValue;
+            if (!syncElementValue) return;
+            
+            PSmoothing.Value = rotationSmoothingValue;
+            RSmoothing.Value = positionSmoothingValue;
         }
         public static void ApplySmoothing()
         {
-            SC_SmootherComponent.RotationalSmoothTime = R_Smoothing.Value;
-            SC_SmootherComponent.TranslationSmoothTime = P_Smoothing.Value;
+            _scSmootherComponent.RotationalSmoothTime = RSmoothing.Value;
+            _scSmootherComponent.TranslationSmoothTime = PSmoothing.Value;
         }
     }
 }
