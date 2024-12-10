@@ -1,6 +1,6 @@
 #  WideEye
 
-> **Important Note:** This mod does not change the actual field of view (FOV) of your VR headset.
+> **Important Note:** None of these modifications appear in headset, only on the spectator view
 
 **WideEye** is a BONELAB mod that tweaks the spectator camera, allowing for FOV control,  post-processing effects, and more! It enhances the spectator camera visuals and optimizes settings for content creation, giving users tools to customize details to their liking.
 
@@ -13,19 +13,23 @@
 
 * Auto-Apply Settings
 
+* Auto-Save ( Experimental )
+
+* Notification Customizability
+
 * Offset :
 	* Position
 	* Rotation
-	
+
 * Smoothing :
 	* Position
 	* Rotation
-	
+
 * Camera Modes :
 	* Head : Camera moves with the player's head
 	* Pinned : Camera stays in place
 
-*  Avatar Mesh Control (On | Off) :
+*  Avatar Meshes Control (On | Off) :
 	* Hair Meshes
 	* Head Meshes
 
@@ -37,14 +41,14 @@
 ##  Requirements
 
 * PC
-* BONELAB Patch 5+
-* MelonLoader 0.6+
+* BONELAB Patch 5/6
+* MelonLoader 0.6
 * [BoneLib-3.1.1](https://thunderstore.io/c/bonelab/p/gnonme/BoneLib/)
 
 ## Installation
 1. Download the latest WideEye release from [**Thunderstore**](https://thunderstore.io/c/bonelab/p/HL2H0/WideEye/).
 2. Extract the downloaded file.
-3. Move the extracted `WideEye.dll` to your `Mods` folder in your BONELAB installation directory. 
+3. Move the extracted `WideEye.dll` to your `Mods` folder in your BONELAB installation directory.
 
 ## Issues, Feedback, and Contributing
 
@@ -53,16 +57,17 @@ WideEye is open-source and invites contributions! If you have ideas for improvem
 
 Use the WideEye [**GitHub issues page**](https://github.com/HL2H0/WideEye/issues) to report any issues you run into, or make any suggestions you have to improve it. All of these comments help make WideEye a better experience for everyone.
 
-Thanks for using WideEye! 
+Thanks for using WideEye!
 
-## Contributions 
+## Contributions
 
-This project has benefitted from the following people: 
+This project has benefited from the following people:
 
 * **[WaveSmash](https://github.com/WaveSmashies)** (Smoothing, Rotation offset) *[Suggestion]*
 * **[xDraxxis](https://github.com/xDraxxis)** (Position offset, Preferences) *[Suggestions]*
+* **[ThomasSteve83](https://github.com/ThomasSteve83)** (Notification Customizability) *[Suggestion]*
 
- Thank you to all contributors for your valuable input!
+Thank you to all contributors for your valuable input!
 
 ##  Credits
 
@@ -70,12 +75,24 @@ This project has benefitted from the following people:
 * TrevTV - [MelonLoader Mod Template](https://github.com/TrevTV/MelonLoader.VSWizard)
 
 ## Future Plans
-* Handheld Mode
+* Handheld Camera
 * Presets System
-* MKGlow Settings
-* Custom UI
+* MKGlow Settings Support
 
 # ChangeLog
+## [2.1.0] **Regular Update**
+
+### Added
+* Notification Customizability
+* Auto Save ( Experimental )
+
+
+### Changed
+* Reduced the waiting time form 5 seconds to 3 seconds
+
+### Fixed
+* A few typos lol
+* When preferences is loaded, rotation smoothing loads as position smoothing
 
 ## [2.0.0] **Major Update**
 
@@ -90,12 +107,12 @@ This project has benefitted from the following people:
 	* Auto Exposure
 	* Chromatic Aberration
 	* Lens Distortion
-	
+
 * Camera Modes :
 	* Pinned
 	* Head
 
-* Avatar Mesh Control (On | Off) :
+* Avatar Meshes Control (On | Off) :
 	* Hair Meshes
 	* Head Meshes
 
@@ -117,7 +134,7 @@ This project has benefitted from the following people:
 
 ### Known Issues
 * Position smoothing may cause the spectator camera to clip through head meshes.
-* Levels with scene chunks may un-find the camera but it won't affect the modifications the mod made
+* Levels with scene chunks may un-find the camera, but it won't affect the modifications the mod made
 
 ## [1.1.0] **Regular Update**
 
@@ -129,7 +146,7 @@ This project has benefitted from the following people:
 * Changing values won't be accessible when the camera is not found, reducing confusion.
 
 ### Known Issues
-* Levels with scene chunks may un-find the cam but it won't affect the modifications the mod made
+* Levels with scene chunks may un-find the cam, but it won't affect the modifications the mod made
 
 
 ## [1.0.0]

@@ -1,5 +1,19 @@
 ﻿# WideEye ChangeLog
 
+## [2.1.0] **Regular Update**
+
+### Added
+* Notification Customizability
+* Auto Save ( Experimental )
+
+
+### Changed
+* Reduced the waiting time form 5 seconds to 3 seconds
+
+### Fixed
+* A few typos lol
+* When preferences is loaded, rotation smoothing loads as position smoothing
+
 ## [2.0.0] **Major Update**
 
 ### Added
@@ -13,12 +27,12 @@
 	* Auto Exposure
 	* Chromatic Aberration
 	* Lens Distortion
-	
+
 * Camera Modes :
 	* Pinned
 	* Head
 
-* Avatar Mesh Control (On | Off) :
+* Avatar Meshes Control (On | Off) :
 	* Hair Meshes
 	* Head Meshes
 
@@ -40,7 +54,7 @@
 
 ### Known Issues
 * Position smoothing may cause the spectator camera to clip through head meshes.
-* Levels with scene chunks may un-find the camera but it won't affect the modifications the mod made
+* Levels with scene chunks may un-find the camera, but it won't affect the modifications the mod made
 
 ## [1.1.0] **Regular Update**
 
@@ -52,10 +66,9 @@
 * Changing values won't be accessible when the camera is not found, reducing confusion.
 
 ### Known Issues
-* Levels with scene chunks may un-find the cam but it won't affect the modifications the mod made
+* Levels with scene chunks may un-find the cam, but it won't affect the modifications the mod made
 
 
 ## [1.0.0]
 
 * Initial Release
-

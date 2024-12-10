@@ -63,8 +63,7 @@ namespace WideEye
         private static CameraModeType _cameraMode = CameraModeType.Head;
         public static bool LookAtPlayer;
         private static bool _foundCamera;
-
-        //Method made for making things easier
+        
 
         //MelonLoader & BoneLib Events
 
