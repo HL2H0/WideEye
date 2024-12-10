@@ -6,22 +6,23 @@ using BoneLib.Notifications;
 
 using Il2CppOccaSoftware.Exposure.Runtime;
 
-using static WideEye.Mod;
-using static WideEye.MenuSetup;
-
 namespace WideEye
 {
     public static class ModPreferences
     {
         //Pref
 
-        private static MelonPreferences_Category _categWideEye;
+        public static MelonPreferences_Category CategWideEye;
         private static MelonPreferences_Entry<float> _prefFov;
         private static MelonPreferences_Entry<bool> _prefPostFX;
         private static MelonPreferences_Entry<Vector3> _prefRotationOffset;
         private static MelonPreferences_Entry<Vector3> _prefPositionOffset;
         private static MelonPreferences_Entry<float> _prefRotationSmoothing;
         private static MelonPreferences_Entry<float> _prefPositionSmoothing;
+        public static MelonPreferences_Entry<bool> PrefShowOtherNotifi;
+        public static MelonPreferences_Entry<bool> PrefShowPrefNotifi;
+        public static MelonPreferences_Entry<bool> PrefShowCameraDisabledNotifi;
+        public static MelonPreferences_Entry<bool> PrefShowCameraFoundNotifi;
 
 
         //Post-FX Pref
@@ -48,99 +49,115 @@ namespace WideEye
         private static MelonPreferences_Entry<float> _prefAeL2Ds;
         private static MelonPreferences_Entry<AutoExposureMeteringMaskMode> _prefAeMeteringMask;
         private static MelonPreferences_Entry<float> _prefAeMetProcedFalloff;
-
-
+        
         public static void CreatePref()
         {
-            _categWideEye = MelonPreferences.CreateCategory("WideEye");
-            _prefFov = _categWideEye.CreateEntry<float>("Fov", 75);
-            _prefPostFX = _categWideEye.CreateEntry<bool>("PostFX", true);
-            _prefRotationOffset = _categWideEye.CreateEntry<Vector3>("RotationOffset", new(11, 0, 0));
-            _prefPositionOffset = _categWideEye.CreateEntry<Vector3>("PositionOffset", Vector3.zero);
-            _prefRotationSmoothing = _categWideEye.CreateEntry<float>("RotationSmoothing", 0);
-            _prefPositionSmoothing = _categWideEye.CreateEntry<float>("PositionSmoothing", 0);
+            CategWideEye = MelonPreferences.CreateCategory("WideEye");
+            _prefFov = CategWideEye.CreateEntry("Fov", 75f);
+            _prefPostFX = CategWideEye.CreateEntry("PostFX", true);
+            _prefRotationOffset = CategWideEye.CreateEntry("RotationOffset", new Vector3(11f, 0f, 0f));
+            _prefPositionOffset = CategWideEye.CreateEntry("PositionOffset", Vector3.zero);
+            _prefRotationSmoothing = CategWideEye.CreateEntry("RotationSmoothing", 0f);
+            _prefPositionSmoothing = CategWideEye.CreateEntry("PositionSmoothing", 0f);
+            PrefShowOtherNotifi = CategWideEye.CreateEntry("ShowOtherNotification", true);
+            PrefShowPrefNotifi = CategWideEye.CreateEntry("ShowPrefNotification", true);
+            PrefShowCameraDisabledNotifi = CategWideEye.CreateEntry("ShowCameraDisabledNotification", true);
+            PrefShowCameraFoundNotifi = CategWideEye.CreateEntry("ShowCameraFoundNotification", true);
 
             _categPfxLd = MelonPreferences.CreateCategory("WideEye_PostFX_LensDistortion");
-            _prefLdEnabled = _categPfxLd.CreateEntry<bool>("Enabled", true);
-            _prefLdCenter = _categPfxLd.CreateEntry<Vector2>("Center", new(0.50f, 0.50f));
-            _prefLdIntensity = _categPfxLd.CreateEntry<float>("Intensity", 0.48f);
-            _prefLdScale = _categPfxLd.CreateEntry<float>("Scale", 1);
-            _prefLdXMultiplier = _categPfxLd.CreateEntry<float>("xMultiplier", 0.59f);
-            _prefLdYMultiplier = _categPfxLd.CreateEntry<float>("yMultiplier", 0.59f);
+            _prefLdEnabled = _categPfxLd.CreateEntry("Enabled", true);
+            _prefLdCenter = _categPfxLd.CreateEntry("Center", new Vector2(0.50f, 0.50f));
+            _prefLdIntensity = _categPfxLd.CreateEntry("Intensity", 0.48f);
+            _prefLdScale = _categPfxLd.CreateEntry("Scale", 1f);
+            _prefLdXMultiplier = _categPfxLd.CreateEntry("xMultiplier", 0.59f);
+            _prefLdYMultiplier = _categPfxLd.CreateEntry("yMultiplier", 0.59f);
 
             _categPfxCa = MelonPreferences.CreateCategory("WideEye_PostFX_ChromaticAberration");
-            _prefCaEnabled = _categPfxCa.CreateEntry<bool>("Enabled", true);
-            _prefCaIntensity = _categPfxCa.CreateEntry<float>("Intensity", 0.123f);
+            _prefCaEnabled = _categPfxCa.CreateEntry("Enabled", true);
+            _prefCaIntensity = _categPfxCa.CreateEntry("Intensity", 0.123f);
 
             _categPfxAe = MelonPreferences.CreateCategory("WideEye_PostFX_AutoExposure");
-            _prefAeEnabled = _categPfxAe.CreateEntry<bool>("Enabled", true);
-            _prefAeAdaptationMode = _categPfxAe.CreateEntry<AutoExposureAdaptationMode>("AdaptationMode", AutoExposureAdaptationMode.Progressive);
-            _prefAeD2Ls = _categPfxAe.CreateEntry<float>("DarkToLightSpeed", 3);
-            _prefAeEvCompensation = _categPfxAe.CreateEntry<float>("evCompensation", 2.5f);
-            _prefAeEvMax = _categPfxAe.CreateEntry<float>("evMax", 1.2f);
-            _prefAeEvMin = _categPfxAe.CreateEntry<float>("evMin", -1.2f);
+            _prefAeEnabled = _categPfxAe.CreateEntry("Enabled", true);
+            _prefAeAdaptationMode = _categPfxAe.CreateEntry("AdaptationMode", AutoExposureAdaptationMode.Progressive);
+            _prefAeD2Ls = _categPfxAe.CreateEntry("DarkToLightSpeed", 3f);
+            _prefAeEvCompensation = _categPfxAe.CreateEntry("evCompensation", 2.5f);
+            _prefAeEvMax = _categPfxAe.CreateEntry("evMax", 1.2f);
+            _prefAeEvMin = _categPfxAe.CreateEntry("evMin", -1.2f);
             _prefAeL2Ds = _categPfxAe.CreateEntry<float>("LightToDarkSpeed", 1);
-            _prefAeMeteringMask = _categPfxAe.CreateEntry<AutoExposureMeteringMaskMode>("MeteringMaskMode", AutoExposureMeteringMaskMode.Procedural);
-            _prefAeMetProcedFalloff = _categPfxAe.CreateEntry<float>("MeteringProceduralFalloff", 2);
+            _prefAeMeteringMask = _categPfxAe.CreateEntry("MeteringMaskMode", AutoExposureMeteringMaskMode.Procedural);
+            _prefAeMetProcedFalloff = _categPfxAe.CreateEntry("MeteringProceduralFalloff", 2f);
         }
 
         public static void LoadPref()
         {
-            ApplyFOV(_prefFov.Value, true, FOVSlider);
-            ApplyOther(OtherType.PostFX, _prefPostFX.Value, true);
-            PostFXToggle.Value = _prefPostFX.Value;
-            ApplyOffset(_prefRotationOffset.Value, OffsetType.Rotation, true, XROffset, YrOffset, ZrOffset);
-            ApplyOffset(_prefPositionOffset.Value, OffsetType.Position, true, XpOffset, YpOffset, ZpOffset);
-            ApplySmoothing(_prefRotationSmoothing.Value, _prefPositionSmoothing.Value, true);
-            ApplyLd(_prefLdEnabled.Value, _prefLdCenter.Value, _prefLdIntensity.Value, _prefLdScale.Value, _prefLdXMultiplier.Value, _prefLdYMultiplier.Value, true);
-            ApplyCa(_prefCaEnabled.Value, _prefCaIntensity.Value, true);
-            ApplyAe(_prefAeEnabled.Value, _prefAeAdaptationMode.Value, _prefAeD2Ls.Value, _prefAeEvCompensation.Value, _prefAeEvMax.Value, _prefAeEvMin.Value, _prefAeL2Ds.Value, _prefAeMeteringMask.Value, _prefAeMetProcedFalloff.Value, true);
-            SendNotification("WideEye | Success", "Loaded Preferences.", NotificationType.Success, 2, true);
+            Mod.ApplyFOV(_prefFov.Value, true, MenuSetup.FOVSlider);
+            Mod.ApplyOther(Mod.OtherType.PostFX, _prefPostFX.Value, true);
+            MenuSetup.PostFXToggle.Value = _prefPostFX.Value;
+            Mod.ApplyOffset(_prefRotationOffset.Value, Mod.OffsetType.Rotation, true, MenuSetup.XROffset, MenuSetup.YrOffset, MenuSetup.ZrOffset);
+            Mod.ApplyOffset(_prefPositionOffset.Value, Mod.OffsetType.Position, true, MenuSetup.XpOffset, MenuSetup.YpOffset, MenuSetup.ZpOffset);
+            Mod.ApplySmoothing(_prefRotationSmoothing.Value, _prefPositionSmoothing.Value, true);
+                
+            ModNotification.ChangeSilentNotification(PrefShowOtherNotifi.Value, PrefShowPrefNotifi.Value,
+                PrefShowCameraDisabledNotifi.Value, PrefShowCameraFoundNotifi.Value, MenuSetup.OtherNotifi,
+                MenuSetup.PrefNotifi, MenuSetup.CameraDisabledNotifi, MenuSetup.CameraFoundNotifi);
+            
+            Mod.ApplyLd(_prefLdEnabled.Value, _prefLdCenter.Value, _prefLdIntensity.Value, _prefLdScale.Value, _prefLdXMultiplier.Value, _prefLdYMultiplier.Value, true);
+            Mod.ApplyCa(_prefCaEnabled.Value, _prefCaIntensity.Value, true);
+            Mod.ApplyAe(_prefAeEnabled.Value, _prefAeAdaptationMode.Value, _prefAeD2Ls.Value, _prefAeEvCompensation.Value, _prefAeEvMax.Value, _prefAeEvMin.Value, _prefAeL2Ds.Value, _prefAeMeteringMask.Value, _prefAeMetProcedFalloff.Value, true);
+            var notification = new ModNotification(ModNotification.ModNotificationType.Preferences, "WideEye | Success", "Loaded Preferences.", NotificationType.Success, 2);
+            notification.Show();
             MelonLogger.Msg(ConsoleColor.Green, "Loaded Preferences.");
         }
 
         public static void SavePref()
         {
-            _prefFov.Value = FOVSlider.Value;
-            _prefPostFX.Value = PostFXToggle.Value;
-            _prefRotationOffset.Value = new(XROffset.Value, YrOffset.Value, ZrOffset.Value);
-            _prefPositionOffset.Value = new(XpOffset.Value, YpOffset.Value, ZpOffset.Value);
-            _prefRotationSmoothing.Value = RSmoothing.Value;
-            _prefPositionSmoothing.Value = PSmoothing.Value;
+            _prefFov.Value = MenuSetup.FOVSlider.Value;
+            _prefPostFX.Value = MenuSetup.PostFXToggle.Value;
+            _prefRotationOffset.Value = new Vector3(MenuSetup.XROffset.Value, MenuSetup.YrOffset.Value, MenuSetup.ZrOffset.Value);
+            _prefPositionOffset.Value = new Vector3(MenuSetup.XpOffset.Value, MenuSetup.YpOffset.Value, MenuSetup.ZpOffset.Value);
+            _prefRotationSmoothing.Value = MenuSetup.RSmoothing.Value;
+            _prefPositionSmoothing.Value = MenuSetup.PSmoothing.Value;
 
-            _prefLdEnabled.Value = LdEnabled.Value;
-            _prefLdCenter.Value = new(LdCenterX.Value, LdCenterY.Value);
-            _prefLdIntensity.Value = LdIntensity.Value;
-            _prefLdScale.Value = LdScale.Value;
-            _prefLdXMultiplier.Value = LdXMultiplier.Value;
-            _prefLdYMultiplier.Value = LdYMultiplier.Value;
+            PrefShowOtherNotifi.Value = MenuSetup.OtherNotifi.Value;
+            PrefShowPrefNotifi.Value = MenuSetup.PrefNotifi.Value;
+            PrefShowCameraDisabledNotifi.Value = MenuSetup.CameraDisabledNotifi.Value;
+            PrefShowCameraFoundNotifi.Value = MenuSetup.CameraFoundNotifi.Value;
 
-            _prefCaEnabled.Value = CaEnabled.Value;
-            _prefCaIntensity.Value = CaIntensity.Value;
+            _prefLdEnabled.Value = MenuSetup.LdEnabled.Value;
+            _prefLdCenter.Value = new Vector2(MenuSetup.LdCenterX.Value, MenuSetup.LdCenterY.Value);
+            _prefLdIntensity.Value = MenuSetup.LdIntensity.Value;
+            _prefLdScale.Value = MenuSetup.LdScale.Value;
+            _prefLdXMultiplier.Value = MenuSetup.LdXMultiplier.Value;
+            _prefLdYMultiplier.Value = MenuSetup.LdYMultiplier.Value;
 
-            _prefAeEnabled.Value = AeEnabled.Value;
-            _prefAeAdaptationMode.Value = (AutoExposureAdaptationMode)AeAdaptationMode.Value;
-            _prefAeD2Ls.Value = AeD2Ls.Value;
-            _prefAeEvCompensation.Value = AeEvCompensation.Value;
-            _prefAeEvMax.Value = AeEvMax.Value;
-            _prefAeEvMin.Value = AeEvMin.Value;
-            _prefAeL2Ds.Value = AeL2Ds.Value;
-            _prefAeMeteringMask.Value = (AutoExposureMeteringMaskMode)AeMeteringMaskMode.Value;
-            _prefAeMetProcedFalloff.Value = AeMeteringProceduralFalloff.Value;
+            _prefCaEnabled.Value = MenuSetup.CaEnabled.Value;
+            _prefCaIntensity.Value = MenuSetup.CaIntensity.Value;
 
-            _categWideEye.SaveToFile(false);
+            _prefAeEnabled.Value = MenuSetup.AeEnabled.Value;
+            _prefAeAdaptationMode.Value = (AutoExposureAdaptationMode)MenuSetup.AeAdaptationMode.Value;
+            _prefAeD2Ls.Value = MenuSetup.AeD2Ls.Value;
+            _prefAeEvCompensation.Value = MenuSetup.AeEvCompensation.Value;
+            _prefAeEvMax.Value = MenuSetup.AeEvMax.Value;
+            _prefAeEvMin.Value = MenuSetup.AeEvMin.Value;
+            _prefAeL2Ds.Value = MenuSetup.AeL2Ds.Value;
+            _prefAeMeteringMask.Value = (AutoExposureMeteringMaskMode)MenuSetup.AeMeteringMaskMode.Value;
+            _prefAeMetProcedFalloff.Value = MenuSetup.AeMeteringProceduralFalloff.Value;
+
+            CategWideEye.SaveToFile(false);
             _categPfxLd.SaveToFile(false);
             _categPfxCa.SaveToFile(false);
             _categPfxAe.SaveToFile(false);
-            SendNotification("WideEye | Success", "Saved Preferences.", NotificationType.Success, 2, true);
+            
+            var notification = new ModNotification(ModNotification.ModNotificationType.Preferences, "WideEye | Success", "Saved Preferences.", NotificationType.Success, 2);
+            notification.Show();
             MelonLogger.Msg(ConsoleColor.Green, "Saved Preferences.");
+           
         }
-
+        
+        
         public static void ClearPref()
         {
-            SendNotification("WideEye | Please Wait", "Clearing Preferences...", NotificationType.Information, 2, true);
-            MelonLogger.Msg("Clearing Preferences...");
-            var categ = _categWideEye.Entries
+            var categ = CategWideEye.Entries
             .Concat(_categPfxLd.Entries)
             .Concat(_categPfxCa.Entries)
             .Concat(_categPfxAe.Entries)
@@ -151,7 +168,8 @@ namespace WideEye
                 entry.ResetToDefault();
             }
             LoadPref();
-            SendNotification("WideEye | Done!", "Cleared All Preferences", NotificationType.Success, 2, true);
+            var notification = new ModNotification(ModNotification.ModNotificationType.Preferences, "WideEye | Success", "Cleared All Preferences", NotificationType.Success, 2);
+            notification.Show();
             MelonLogger.Msg(ConsoleColor.Green, "Done!, Cleared All Preferences");
         }
 

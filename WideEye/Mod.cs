@@ -15,6 +15,7 @@ using Il2CppOccaSoftware.Exposure.Runtime;
 
 using static WideEye.MenuSetup;
 using static WideEye.ModPreferences;
+using static WideEye.ModNotification;
 using Il2CppSLZ.Marrow;
 
 [assembly: MelonInfo(typeof(WideEye.Mod), "WideEye", "2.1.0", "HL2H0")]
@@ -53,7 +54,6 @@ namespace WideEye
 
         public enum OffsetType { Position, Rotation }
         public enum ResetType { Fov, Smoothing, RotationOffset, PositionOffset, LensDistortion, ChromaticAberration, AutoExposure, All }
-        public enum PostFXType { LensDistortion, ChromaticAberration, AutoExposure }
         public enum CameraModeType { Head, Pinned }
         public enum LookAtPositionType { RightHand, LeftHand, Head }
         public enum OtherType { HairMeshes, HeadMesh, PostFX };
@@ -65,18 +65,6 @@ namespace WideEye
         private static bool _foundCamera;
 
         //Method made for making things easier
-        public static void SendNotification(string title, string message, NotificationType type, float popupLength, bool showTitleOnPopup)
-        {
-            var notification = new Notification
-            {
-                Title = title,
-                Message = message,
-                Type = type,
-                PopupLength = popupLength,
-                ShowTitleOnPopup = showTitleOnPopup
-            };
-            Notifier.Send(notification);
-        }
 
         //MelonLoader & BoneLib Events
 
@@ -125,7 +113,8 @@ namespace WideEye
         {
             if (HelperMethods.IsAndroid())
             {
-                SendNotification("WideEye | Error", "WideEye doesn't work with Android", NotificationType.Error, 3f, true);
+                var notification = new ModNotification(ModNotificationType.Force, "WideEye | Error", "WideEye doesn't work with Android", NotificationType.Error, 3f);
+                notification.Show();
             }
             else
             {
@@ -136,13 +125,15 @@ namespace WideEye
                 {
                     if (isAuto)
                     {
-                        SendNotification("WideEye | Error", "Couldn't find the camera automatically.\nPlease open WideEye's menu and find it manually.", NotificationType.Error, 3, true);
+                        var notification = new ModNotification(ModNotificationType.Force, "WideEye | Error", "Couldn't find the camera automatically.\nPlease open WideEye's menu and find it manually.", NotificationType.Error, 3);
+                        notification.Show();
                         MelonLogger.Error("Couldn't find the camera automatically");
                         MainPage.Add(GetCameraButton);
                     }
                     else
                     {
-                        SendNotification("WideEye | Error", "Couldn't find the camera.", NotificationType.Error, 3, true);
+                        var notification = new ModNotification(ModNotificationType.Force, "WideEye | Error", "Couldn't find the camera.", NotificationType.Error, 3);
+                        notification.Show();
                         MelonLogger.Error("Couldn't find the camera");
                     }
 
@@ -151,7 +142,8 @@ namespace WideEye
                 {
                     if (!_scGameObject.active)
                     {
-                        SendNotification("WideEye | Warning", "Spectator Camera Is Not Active.\nModifications will not take action.", NotificationType.Warning, 5, true);
+                        var notification = new ModNotification(ModNotificationType.CameraDisabled, "WideEye | Warning", "Spectator Camera Is Not Active.\nModifications will not take action.", NotificationType.Warning, 3);
+                        notification.Show();
                         MelonLogger.Warning("Spectator Camera Is Not Active. Modifications will not take action.");
                     }
 
@@ -163,13 +155,15 @@ namespace WideEye
                     GetPostFXOverrides();
                     if (isAuto)
                     {
-                        SendNotification("WideEye | Success", "Found camera automatically", NotificationType.Success, 3, true);
+                        var notification = new ModNotification(ModNotificationType.CameraFound, "WideEye | Success", "Found camera automatically", NotificationType.Success, 3);
+                        notification.Show();
                         MelonLogger.Msg(System.ConsoleColor.Green, "Found camera automatically");
                     }
                     else
                     {
                         MainPage.Remove(GetCameraButton);
-                        SendNotification("WideEye | Success", "Found camera manually", NotificationType.Success, 2, true);
+                        var notification = new ModNotification(ModNotificationType.CameraFound, "WideEye | Success", "Found camera manually", NotificationType.Success, 3);
+                        notification.Show();
                         MelonLogger.Msg(System.ConsoleColor.Green, "Found camera manually");
                     }
                     
@@ -194,23 +188,23 @@ namespace WideEye
             switch (resetType)
             {
                 case ResetType.Fov:
-                    ApplyFOV(75, true, FOVSlider);
+                    ApplyFOV(75f, true, FOVSlider);
                     break;
 
                 case ResetType.Smoothing:
-                    ApplySmoothing(0, 0, true);
+                    ApplySmoothing(0f, 0f, true);
                     break;
 
                 case ResetType.RotationOffset:
-                    ApplyOffset(new(11, 0, 0), OffsetType.Rotation, true, XROffset, YrOffset, ZrOffset);
+                    ApplyOffset(new(11f, 0f, 0f), OffsetType.Rotation, true, XROffset, YrOffset, ZrOffset);
                     break;
                 
                 case ResetType.PositionOffset:
-                    ApplyOffset(new(0, 0, 0), OffsetType.Position, true, XpOffset, YpOffset, ZpOffset);
+                    ApplyOffset(new(0f, 0f, 0f), OffsetType.Position, true, XpOffset, YpOffset, ZpOffset);
                     break;
 
                 case ResetType.LensDistortion:
-                    ApplyLd(true, new Vector2(0.5f, 0.5f), 0.48f, 1, 0.59f, 1, true);
+                    ApplyLd(true, new Vector2(0.5f, 0.5f), 0.48f, 1f, 0.59f, 1f, true);
                     break;
 
                 case ResetType.ChromaticAberration:
@@ -218,17 +212,17 @@ namespace WideEye
                     break;
 
                 case ResetType.AutoExposure:
-                    ApplyAe(true, AutoExposureAdaptationMode.Progressive, 3, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2, true);
+                    ApplyAe(true, AutoExposureAdaptationMode.Progressive, 3f, 2.5f, 1.2f, -1.2f, 1f, AutoExposureMeteringMaskMode.Procedural, 2f, true);
                     break;
 
                 case ResetType.All:
-                    ApplyFOV(75, true, FOVSlider);
-                    ApplySmoothing(0, 0, true);
-                    ApplyOffset(new(11, 0, 0), OffsetType.Rotation, true, XROffset, YrOffset, ZrOffset);
-                    ApplyOffset(new(0, 0, 0), OffsetType.Position, true, XpOffset, YpOffset, ZpOffset);
-                    ApplyLd(true, new Vector2(0.5f, 0.5f), 0.48f, 1, 0.59f, 1, true);
+                    ApplyFOV(75f, true, FOVSlider);
+                    ApplySmoothing(0f, 0f, true);
+                    ApplyOffset(new(11f, 0, 0), OffsetType.Rotation, true, XROffset, YrOffset, ZrOffset);
+                    ApplyOffset(new(0f, 0f, 0f), OffsetType.Position, true, XpOffset, YpOffset, ZpOffset);
+                    ApplyLd(true, new Vector2(0.5f, 0.5f), 0.48f, 1f, 0.59f, 1f, true);
                     ApplyCa(true, 0.123f, true);
-                    ApplyAe(true, AutoExposureAdaptationMode.Progressive, 3, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2, true);
+                    ApplyAe(true, AutoExposureAdaptationMode.Progressive, 3f, 2.5f, 1.2f, -1.2f, 1, AutoExposureMeteringMaskMode.Procedural, 2f, true);
                     _scVolumeComponent.enabled = true;
                     PostFXToggle.Value = true;
                     break;

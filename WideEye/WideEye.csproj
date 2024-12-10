@@ -16,6 +16,7 @@
 	<ItemGroup>
 	  <Compile Include="MenuSetup.cs" />
 	  <Compile Include="Mod.cs" />
+	  <Compile Include="ModNotification.cs" />
 	  <Compile Include="ModPreferences.cs" />
 	</ItemGroup>
 
