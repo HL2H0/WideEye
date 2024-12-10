@@ -10,10 +10,10 @@ namespace WideEye
         NotificationType notificationType,
         float popupLength)
     {
-        private static bool _showOther = true;
-        private static bool _showPreferences = true;
-        private static bool _showCameraDisabled = true;
-        private static bool _showCameraFound = true;
+        private static bool _showOther;
+        private static bool _showPreferences;
+        private static bool _showCameraDisabled;
+        private static bool _showCameraFound;
         
         public enum ModNotificationType { Preferences, CameraDisabled, CameraFound, Other, Force }
 
@@ -30,7 +30,8 @@ namespace WideEye
             _showCameraDisabled = MenuSetup.CameraDisabledNotifi.Value;
             _showCameraFound = MenuSetup.CameraFoundNotifi.Value;
             _showCameraDisabled = MenuSetup.CameraDisabledNotifi.Value;
-            ModPreferences.SavePref();
+            if (ModPreferences.AutoSave) ModPreferences.SavePref();
+            
         }
 
         public static void ChangeSilentNotification(bool other, bool preference, bool cameraFound, bool cameraDisabled,
@@ -42,11 +43,12 @@ namespace WideEye
             _showCameraDisabled = cameraDisabled;
             _showCameraFound = cameraFound;
             _showCameraDisabled = cameraDisabled;
-            otherElement.Value = otherElement.Value;
-            preferenceElement.Value = preferenceElement.Value;
-            cameraFoundElement.Value = cameraFoundElement.Value;
-            cameraDisabledElement.Value = cameraDisabledElement.Value;
-            cameraFoundElement.Value = cameraFoundElement.Value;
+            otherElement.Value = other;
+            preferenceElement.Value = preference;
+            cameraFoundElement.Value = cameraFound;
+            cameraDisabledElement.Value = cameraDisabled;
+            cameraFoundElement.Value = cameraFound;
+            
         }
 
         public void Show()

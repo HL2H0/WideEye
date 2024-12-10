@@ -28,7 +28,7 @@ namespace WideEye
         private static Page PostFXPage { get; set; }
         public static BoolElement PostFXToggle { get; private set; }
         private static Page OtherPage { get; set; }
-        private static BoolElement AutoSave { get; set; }
+        public static BoolElement AutoSave { get; set; }
         private static Page CameraModePage { get; set; } 
         public static BoolElement EleLookAtPlayer { get; private set; }
         private static Page SupportPage { get; set; }
@@ -141,7 +141,7 @@ namespace WideEye
 
             
             OtherPage = MainPage.CreatePage("Other", Color.gray);
-            AutoSave = OtherPage.CreateBool("Auto Save (Experimental)", Color.yellow, false, null);
+            AutoSave = OtherPage.CreateBool("Auto Save (Experimental)", Color.yellow, false, v => ModPreferences.AutoSave = v);
             OtherPage.Add(new BoolElement("Head Meshes", Color.yellow, true, value => Mod.ApplyOther(Mod.OtherType.HeadMesh, value)));
             OtherPage.Add(new BoolElement("Hair Meshes", Color.yellow, true, value => Mod.ApplyOther(Mod.OtherType.HairMeshes, value)));
             OtherPage.Add(new FunctionElement("Reset All To Default", Color.red, () => Mod.ResetToDefault(Mod.ResetType.All)));

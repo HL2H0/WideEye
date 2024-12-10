@@ -10,6 +10,7 @@ namespace WideEye
 {
     public static class ModPreferences
     {
+        public static bool AutoSave;
         //Pref
 
         public static MelonPreferences_Category CategWideEye;
@@ -19,10 +20,11 @@ namespace WideEye
         private static MelonPreferences_Entry<Vector3> _prefPositionOffset;
         private static MelonPreferences_Entry<float> _prefRotationSmoothing;
         private static MelonPreferences_Entry<float> _prefPositionSmoothing;
-        public static MelonPreferences_Entry<bool> PrefShowOtherNotifi;
-        public static MelonPreferences_Entry<bool> PrefShowPrefNotifi;
-        public static MelonPreferences_Entry<bool> PrefShowCameraDisabledNotifi;
-        public static MelonPreferences_Entry<bool> PrefShowCameraFoundNotifi;
+        private static MelonPreferences_Entry<bool> _prefShowOtherNotifi;
+        private static MelonPreferences_Entry<bool> _prefShowPrefNotifi;
+        private static MelonPreferences_Entry<bool> _prefShowCameraDisabledNotifi;
+        private static MelonPreferences_Entry<bool> _prefShowCameraFoundNotifi;
+        private static MelonPreferences_Entry<bool> _prefAutoSave;
 
 
         //Post-FX Pref
@@ -59,10 +61,11 @@ namespace WideEye
             _prefPositionOffset = CategWideEye.CreateEntry("PositionOffset", Vector3.zero);
             _prefRotationSmoothing = CategWideEye.CreateEntry("RotationSmoothing", 0f);
             _prefPositionSmoothing = CategWideEye.CreateEntry("PositionSmoothing", 0f);
-            PrefShowOtherNotifi = CategWideEye.CreateEntry("ShowOtherNotification", true);
-            PrefShowPrefNotifi = CategWideEye.CreateEntry("ShowPrefNotification", true);
-            PrefShowCameraDisabledNotifi = CategWideEye.CreateEntry("ShowCameraDisabledNotification", true);
-            PrefShowCameraFoundNotifi = CategWideEye.CreateEntry("ShowCameraFoundNotification", true);
+            _prefShowOtherNotifi = CategWideEye.CreateEntry("ShowOtherNotification", true);
+            _prefShowPrefNotifi = CategWideEye.CreateEntry("ShowPrefNotification", true);
+            _prefShowCameraDisabledNotifi = CategWideEye.CreateEntry("ShowCameraDisabledNotification", true);
+            _prefShowCameraFoundNotifi = CategWideEye.CreateEntry("ShowCameraFoundNotification", true);
+            _prefAutoSave = CategWideEye.CreateEntry("AutoSave", false);
 
             _categPfxLd = MelonPreferences.CreateCategory("WideEye_PostFX_LensDistortion");
             _prefLdEnabled = _categPfxLd.CreateEntry("Enabled", true);
@@ -97,9 +100,12 @@ namespace WideEye
             Mod.ApplyOffset(_prefPositionOffset.Value, Mod.OffsetType.Position, true, MenuSetup.XpOffset, MenuSetup.YpOffset, MenuSetup.ZpOffset);
             Mod.ApplySmoothing(_prefRotationSmoothing.Value, _prefPositionSmoothing.Value, true);
                 
-            ModNotification.ChangeSilentNotification(PrefShowOtherNotifi.Value, PrefShowPrefNotifi.Value,
-                PrefShowCameraDisabledNotifi.Value, PrefShowCameraFoundNotifi.Value, MenuSetup.OtherNotifi,
+            ModNotification.ChangeSilentNotification(_prefShowOtherNotifi.Value, _prefShowPrefNotifi.Value,
+                _prefShowCameraDisabledNotifi.Value, _prefShowCameraFoundNotifi.Value, MenuSetup.OtherNotifi,
                 MenuSetup.PrefNotifi, MenuSetup.CameraDisabledNotifi, MenuSetup.CameraFoundNotifi);
+            
+            MenuSetup.AutoSave.Value = _prefAutoSave.Value;
+            AutoSave = _prefAutoSave.Value;
             
             Mod.ApplyLd(_prefLdEnabled.Value, _prefLdCenter.Value, _prefLdIntensity.Value, _prefLdScale.Value, _prefLdXMultiplier.Value, _prefLdYMultiplier.Value, true);
             Mod.ApplyCa(_prefCaEnabled.Value, _prefCaIntensity.Value, true);
@@ -118,11 +124,13 @@ namespace WideEye
             _prefRotationSmoothing.Value = MenuSetup.RSmoothing.Value;
             _prefPositionSmoothing.Value = MenuSetup.PSmoothing.Value;
 
-            PrefShowOtherNotifi.Value = MenuSetup.OtherNotifi.Value;
-            PrefShowPrefNotifi.Value = MenuSetup.PrefNotifi.Value;
-            PrefShowCameraDisabledNotifi.Value = MenuSetup.CameraDisabledNotifi.Value;
-            PrefShowCameraFoundNotifi.Value = MenuSetup.CameraFoundNotifi.Value;
+            _prefShowOtherNotifi.Value = MenuSetup.OtherNotifi.Value;
+            _prefShowPrefNotifi.Value = MenuSetup.PrefNotifi.Value;
+            _prefShowCameraDisabledNotifi.Value = MenuSetup.CameraDisabledNotifi.Value;
+            _prefShowCameraFoundNotifi.Value = MenuSetup.CameraFoundNotifi.Value;
 
+            _prefAutoSave.Value = MenuSetup.AutoSave.Value;
+            
             _prefLdEnabled.Value = MenuSetup.LdEnabled.Value;
             _prefLdCenter.Value = new Vector2(MenuSetup.LdCenterX.Value, MenuSetup.LdCenterY.Value);
             _prefLdIntensity.Value = MenuSetup.LdIntensity.Value;
@@ -147,11 +155,12 @@ namespace WideEye
             _categPfxLd.SaveToFile(false);
             _categPfxCa.SaveToFile(false);
             _categPfxAe.SaveToFile(false);
+
+            if (AutoSave) return;
             
             var notification = new ModNotification(ModNotification.ModNotificationType.Preferences, "WideEye | Success", "Saved Preferences.", NotificationType.Success, 2);
             notification.Show();
             MelonLogger.Msg(ConsoleColor.Green, "Saved Preferences.");
-           
         }
         
         

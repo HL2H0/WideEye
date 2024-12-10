@@ -74,7 +74,7 @@ namespace WideEye
             SetupBoneMenu();
             Hooking.OnLevelUnloaded += BoneLib_OnLevelUnloaded;
             Hooking.OnUIRigCreated += BoneLib_OnUIRigCreated;
-            LoggerInstance.Msg("WideEye 2.0.0 Has Been Initialized.");
+            LoggerInstance.Msg("WideEye 2.1.0 Has Been Initialized.");
         }
 
         private void BoneLib_OnUIRigCreated()  
@@ -105,7 +105,7 @@ namespace WideEye
         //Methods to ensure everything is collected
         private static IEnumerator WaitForCameraRig()
         {
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(3f);
             GetTargetCamera(true);
         }
 
@@ -266,6 +266,7 @@ namespace WideEye
         public static void ApplyFOV(float fov, bool syncElementValue = false, FloatElement fovEle = null)
         {
             _scCameraComponent.fieldOfView = fov;
+            if (ModPreferences.AutoSave) SavePref();
             if (!syncElementValue) return;
             if (fovEle != null) fovEle.Value = fov;
         }
@@ -327,6 +328,7 @@ namespace WideEye
                     _stTransform.localPosition = new(XpOffset.Value, YpOffset.Value, ZpOffset.Value);
                     break;
             }
+            if (ModPreferences.AutoSave) SavePref();
         }
         public static void ApplyLd(bool enabled, Vector2 center, float intensity, float scale, float xMulti, float yMulti, bool syncElements)
         {
@@ -355,6 +357,7 @@ namespace WideEye
             _lensDistortionOverride.scale.value = LdScale.Value;
             _lensDistortionOverride.xMultiplier.value = LdXMultiplier.Value;
             _lensDistortionOverride.yMultiplier.value = LdYMultiplier.Value;
+            if (ModPreferences.AutoSave) SavePref();
         }
 
         public static void ApplyCa(bool enabled, float intensity, bool syncElements)
@@ -369,6 +372,7 @@ namespace WideEye
         {
             _chromaticAberrationOverride.active = CaEnabled.Value;
             _chromaticAberrationOverride.intensity.value = CaIntensity.Value;
+            if (ModPreferences.AutoSave) SavePref();
         }
 
         public static void ApplyAe(bool enabled, AutoExposureAdaptationMode adaptationMode, float d2Ls, float evCompen, float evMax, float evMin, float l2Ds, AutoExposureMeteringMaskMode meteringMaskMode, float meteringProceduralFalloff, bool syncElements)
@@ -406,6 +410,7 @@ namespace WideEye
             _autoExposureOverride.lightToDarkSpeed.value = AeL2Ds.Value;
             _autoExposureOverride.meteringMaskMode.value = (AutoExposureMeteringMaskMode)AeMeteringMaskMode.Value;
             _autoExposureOverride.meteringProceduralFalloff.value = AeMeteringProceduralFalloff.Value;
+            if (ModPreferences.AutoSave) SavePref();
         }
 
         public static void ApplySmoothing(float rotationSmoothingValue, float positionSmoothingValue, bool syncElementValue)
@@ -414,13 +419,14 @@ namespace WideEye
             _scSmootherComponent.TranslationSmoothTime = positionSmoothingValue;
             if (!syncElementValue) return;
             
-            PSmoothing.Value = rotationSmoothingValue;
-            RSmoothing.Value = positionSmoothingValue;
+            RSmoothing.Value = rotationSmoothingValue;
+            PSmoothing.Value = positionSmoothingValue;
         }
         public static void ApplySmoothing()
         {
             _scSmootherComponent.RotationalSmoothTime = RSmoothing.Value;
             _scSmootherComponent.TranslationSmoothTime = PSmoothing.Value;
+            if (ModPreferences.AutoSave) SavePref();
         }
     }
 }
