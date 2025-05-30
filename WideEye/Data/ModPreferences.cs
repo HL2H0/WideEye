@@ -1,12 +1,12 @@
-﻿using MelonLoader;
-
-using UnityEngine;
-
-using BoneLib.Notifications;
-
+﻿using BoneLib.Notifications;
 using Il2CppOccaSoftware.Exposure.Runtime;
+using MelonLoader;
+using UnityEngine;
+using WideEye.Core;
+using WideEye.UI;
+using WideEye.Utilities;
 
-namespace WideEye
+namespace WideEye.Data
 {
     public static class ModPreferences
     {
@@ -93,23 +93,23 @@ namespace WideEye
 
         public static void LoadPref()
         {
-            Mod.ApplyFOV(_prefFov.Value, true, MenuSetup.FOVSlider);
-            Mod.ApplyOther(Mod.OtherType.PostFX, _prefPostFX.Value, true);
-            MenuSetup.PostFXToggle.Value = _prefPostFX.Value;
-            Mod.ApplyOffset(_prefRotationOffset.Value, Mod.OffsetType.Rotation, true, MenuSetup.XROffset, MenuSetup.YrOffset, MenuSetup.ZrOffset);
-            Mod.ApplyOffset(_prefPositionOffset.Value, Mod.OffsetType.Position, true, MenuSetup.XpOffset, MenuSetup.YpOffset, MenuSetup.ZpOffset);
-            Mod.ApplySmoothing(_prefRotationSmoothing.Value, _prefPositionSmoothing.Value, true);
+            SettingsApplier.ApplyFOV(_prefFov.Value, true, ModMenu.FOVSlider);
+            SettingsApplier.ApplyOther(ModEnums.OtherType.PostFX, _prefPostFX.Value, true);
+            ModMenu.PostFXToggle.Value = _prefPostFX.Value;
+            SettingsApplier.ApplyOffset(_prefRotationOffset.Value, ModEnums.OffsetType.Rotation, true, ModMenu.XrOffset, ModMenu.YrOffset, ModMenu.ZrOffset);
+            SettingsApplier.ApplyOffset(_prefPositionOffset.Value, ModEnums.OffsetType.Position, true, ModMenu.XpOffset, ModMenu.YpOffset, ModMenu.ZpOffset);
+            SettingsApplier.ApplySmoothing(_prefRotationSmoothing.Value, _prefPositionSmoothing.Value, true);
                 
             ModNotification.ChangeSilentNotification(_prefShowOtherNotifi.Value, _prefShowPrefNotifi.Value,
-                _prefShowCameraDisabledNotifi.Value, _prefShowCameraFoundNotifi.Value, MenuSetup.OtherNotifi,
-                MenuSetup.PrefNotifi, MenuSetup.CameraDisabledNotifi, MenuSetup.CameraFoundNotifi);
+                _prefShowCameraDisabledNotifi.Value, _prefShowCameraFoundNotifi.Value, ModMenu.OtherNotifi,
+                ModMenu.PrefNotifi, ModMenu.CameraDisabledNotifi, ModMenu.CameraFoundNotifi);
             
-            MenuSetup.AutoSave.Value = _prefAutoSave.Value;
+            ModMenu.AutoSave.Value = _prefAutoSave.Value;
             AutoSave = _prefAutoSave.Value;
             
-            Mod.ApplyLd(_prefLdEnabled.Value, _prefLdCenter.Value, _prefLdIntensity.Value, _prefLdScale.Value, _prefLdXMultiplier.Value, _prefLdYMultiplier.Value, true);
-            Mod.ApplyCa(_prefCaEnabled.Value, _prefCaIntensity.Value, true);
-            Mod.ApplyAe(_prefAeEnabled.Value, _prefAeAdaptationMode.Value, _prefAeD2Ls.Value, _prefAeEvCompensation.Value, _prefAeEvMax.Value, _prefAeEvMin.Value, _prefAeL2Ds.Value, _prefAeMeteringMask.Value, _prefAeMetProcedFalloff.Value, true);
+            SettingsApplier.ApplyLd(_prefLdEnabled.Value, _prefLdCenter.Value, _prefLdIntensity.Value, _prefLdScale.Value, _prefLdXMultiplier.Value, _prefLdYMultiplier.Value, true);
+            SettingsApplier.ApplyCa(_prefCaEnabled.Value, _prefCaIntensity.Value, true);
+            SettingsApplier.ApplyAe(_prefAeEnabled.Value, _prefAeAdaptationMode.Value, _prefAeD2Ls.Value, _prefAeEvCompensation.Value, _prefAeEvMax.Value, _prefAeEvMin.Value, _prefAeL2Ds.Value, _prefAeMeteringMask.Value, _prefAeMetProcedFalloff.Value, true);
             var notification = new ModNotification(ModNotification.ModNotificationType.Preferences, "WideEye | Success", "Loaded Preferences.", NotificationType.Success, 2);
             notification.Show();
             MelonLogger.Msg(ConsoleColor.Green, "Loaded Preferences.");
@@ -117,39 +117,39 @@ namespace WideEye
 
         public static void SavePref()
         {
-            _prefFov.Value = MenuSetup.FOVSlider.Value;
-            _prefPostFX.Value = MenuSetup.PostFXToggle.Value;
-            _prefRotationOffset.Value = new Vector3(MenuSetup.XROffset.Value, MenuSetup.YrOffset.Value, MenuSetup.ZrOffset.Value);
-            _prefPositionOffset.Value = new Vector3(MenuSetup.XpOffset.Value, MenuSetup.YpOffset.Value, MenuSetup.ZpOffset.Value);
-            _prefRotationSmoothing.Value = MenuSetup.RSmoothing.Value;
-            _prefPositionSmoothing.Value = MenuSetup.PSmoothing.Value;
+            _prefFov.Value = ModMenu.FOVSlider.Value;
+            _prefPostFX.Value = ModMenu.PostFXToggle.Value;
+            _prefRotationOffset.Value = new Vector3(ModMenu.XrOffset.Value, ModMenu.YrOffset.Value, ModMenu.ZrOffset.Value);
+            _prefPositionOffset.Value = new Vector3(ModMenu.XpOffset.Value, ModMenu.YpOffset.Value, ModMenu.ZpOffset.Value);
+            _prefRotationSmoothing.Value = ModMenu.RSmoothing.Value;
+            _prefPositionSmoothing.Value = ModMenu.PSmoothing.Value;
 
-            _prefShowOtherNotifi.Value = MenuSetup.OtherNotifi.Value;
-            _prefShowPrefNotifi.Value = MenuSetup.PrefNotifi.Value;
-            _prefShowCameraDisabledNotifi.Value = MenuSetup.CameraDisabledNotifi.Value;
-            _prefShowCameraFoundNotifi.Value = MenuSetup.CameraFoundNotifi.Value;
+            _prefShowOtherNotifi.Value = ModMenu.OtherNotifi.Value;
+            _prefShowPrefNotifi.Value = ModMenu.PrefNotifi.Value;
+            _prefShowCameraDisabledNotifi.Value = ModMenu.CameraDisabledNotifi.Value;
+            _prefShowCameraFoundNotifi.Value = ModMenu.CameraFoundNotifi.Value;
 
-            _prefAutoSave.Value = MenuSetup.AutoSave.Value;
+            _prefAutoSave.Value = ModMenu.AutoSave.Value;
             
-            _prefLdEnabled.Value = MenuSetup.LdEnabled.Value;
-            _prefLdCenter.Value = new Vector2(MenuSetup.LdCenterX.Value, MenuSetup.LdCenterY.Value);
-            _prefLdIntensity.Value = MenuSetup.LdIntensity.Value;
-            _prefLdScale.Value = MenuSetup.LdScale.Value;
-            _prefLdXMultiplier.Value = MenuSetup.LdXMultiplier.Value;
-            _prefLdYMultiplier.Value = MenuSetup.LdYMultiplier.Value;
+            _prefLdEnabled.Value = ModMenu.LdEnabled.Value;
+            _prefLdCenter.Value = new Vector2(ModMenu.LdCenterX.Value, ModMenu.LdCenterY.Value);
+            _prefLdIntensity.Value = ModMenu.LdIntensity.Value;
+            _prefLdScale.Value = ModMenu.LdScale.Value;
+            _prefLdXMultiplier.Value = ModMenu.LdXMultiplier.Value;
+            _prefLdYMultiplier.Value = ModMenu.LdYMultiplier.Value;
 
-            _prefCaEnabled.Value = MenuSetup.CaEnabled.Value;
-            _prefCaIntensity.Value = MenuSetup.CaIntensity.Value;
+            _prefCaEnabled.Value = ModMenu.CaEnabled.Value;
+            _prefCaIntensity.Value = ModMenu.CaIntensity.Value;
 
-            _prefAeEnabled.Value = MenuSetup.AeEnabled.Value;
-            _prefAeAdaptationMode.Value = (AutoExposureAdaptationMode)MenuSetup.AeAdaptationMode.Value;
-            _prefAeD2Ls.Value = MenuSetup.AeD2Ls.Value;
-            _prefAeEvCompensation.Value = MenuSetup.AeEvCompensation.Value;
-            _prefAeEvMax.Value = MenuSetup.AeEvMax.Value;
-            _prefAeEvMin.Value = MenuSetup.AeEvMin.Value;
-            _prefAeL2Ds.Value = MenuSetup.AeL2Ds.Value;
-            _prefAeMeteringMask.Value = (AutoExposureMeteringMaskMode)MenuSetup.AeMeteringMaskMode.Value;
-            _prefAeMetProcedFalloff.Value = MenuSetup.AeMeteringProceduralFalloff.Value;
+            _prefAeEnabled.Value = ModMenu.AeEnabled.Value;
+            _prefAeAdaptationMode.Value = (AutoExposureAdaptationMode)ModMenu.AeAdaptationMode.Value;
+            _prefAeD2Ls.Value = ModMenu.AeD2Ls.Value;
+            _prefAeEvCompensation.Value = ModMenu.AeEvCompensation.Value;
+            _prefAeEvMax.Value = ModMenu.AeEvMax.Value;
+            _prefAeEvMin.Value = ModMenu.AeEvMin.Value;
+            _prefAeL2Ds.Value = ModMenu.AeL2Ds.Value;
+            _prefAeMeteringMask.Value = (AutoExposureMeteringMaskMode)ModMenu.AeMeteringMaskMode.Value;
+            _prefAeMetProcedFalloff.Value = ModMenu.AeMeteringProceduralFalloff.Value;
 
             CategWideEye.SaveToFile(false);
             _categPfxLd.SaveToFile(false);

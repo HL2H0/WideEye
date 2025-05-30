@@ -1,7 +1,8 @@
 using BoneLib.BoneMenu;
 using BoneLib.Notifications;
+using WideEye.Data;
 
-namespace WideEye
+namespace WideEye.UI
 {
     public class ModNotification(
         ModNotification.ModNotificationType type,
@@ -25,11 +26,11 @@ namespace WideEye
 
         public static void ChangeSilentNotification()
         {
-            _showOther = MenuSetup.OtherNotifi.Value;
-            _showPreferences = MenuSetup.PrefNotifi.Value;
-            _showCameraDisabled = MenuSetup.CameraDisabledNotifi.Value;
-            _showCameraFound = MenuSetup.CameraFoundNotifi.Value;
-            _showCameraDisabled = MenuSetup.CameraDisabledNotifi.Value;
+            _showOther = ModMenu.OtherNotifi.Value;
+            _showPreferences = ModMenu.PrefNotifi.Value;
+            _showCameraDisabled = ModMenu.CameraDisabledNotifi.Value;
+            _showCameraFound = ModMenu.CameraFoundNotifi.Value;
+            _showCameraDisabled = ModMenu.CameraDisabledNotifi.Value;
             if (ModPreferences.AutoSave) ModPreferences.SavePref();
             
         }
