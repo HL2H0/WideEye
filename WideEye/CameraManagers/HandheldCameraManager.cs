@@ -1,5 +1,6 @@
 using BoneLib;
 using UnityEngine;
+using WideEye.Core;
 using WideEye.Data;
 namespace WideEye.CameraManagers;
 
@@ -25,6 +26,7 @@ public static class HandheldCameraManager
         if (!Spawned) return;
         GameObject.Destroy(HandheldCamera);
         HandheldCamera = null;
+        CameraController.UpdateView(ModEnums.ViewMode.Head);
     }
     
     public static void TeleportHandheldCamera()

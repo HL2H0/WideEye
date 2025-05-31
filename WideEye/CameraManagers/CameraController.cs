@@ -1,5 +1,7 @@
 using WideEye.Behaviors;
 using WideEye.Core;
+using WideEye.UI;
+using WideEye.Utilities;
 
 namespace WideEye.CameraManagers;
 
@@ -18,5 +20,7 @@ public static class CameraController
         };
         script.SyncCamera = result.Item1;
         Mod.ScSmootherComponent.targetTransform = result.Item2;
+
+        SettingsApplier.ApplyFOV(viewMode == ModEnums.ViewMode.Handheld ? script.FOV : ModMenu.FOVSlider.Value);
     }
 }
