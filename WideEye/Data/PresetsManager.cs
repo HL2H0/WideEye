@@ -103,7 +103,7 @@ namespace WideEye.Data
             var path = Path.Combine(Paths.PresetsPath, $"{presetName}.json");
             if (!File.Exists(path)) return;
             MelonLogger.Msg($"Path: {path}");
-            ProcessStartInfo processStartInfo = new("explorer.exe", path);
+            ProcessStartInfo processStartInfo = new("explorer.exe", $"/select {path}");
             Process.Start(processStartInfo);
         }
 
