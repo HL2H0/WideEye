@@ -252,10 +252,27 @@ namespace WideEye.UI
             ViewPage = MainPage.CreatePage("View", Color.cyan);
             ViewMode = ViewPage.CreateEnum("View Mode", Color.white, ModEnums.ViewMode.Head, v => CameraController.UpdateView((ModEnums.ViewMode)v));
             
-            HandheldCameraPage = ViewPage.CreatePage("Handheld Camera", Color.white); 
-            HandheldCameraPage.CreateFunction("Spawn Camera", Color.green, HandheldCameraManager.SpawnHandheldCamera);
-            HandheldCameraPage.CreateFunction("Destroy Camera", Color.red, HandheldCameraManager.DestroyHandheldCamera);
-            HandheldCameraPage.CreateFunction("Teleport Camera", Color.cyan, HandheldCameraManager.TeleportHandheldCamera);
+            HandheldCameraPage = ViewPage.CreatePage("Handheld Camera", Color.white);
+            if (!ResourcesManager.Loaded)
+            {
+                HandheldCameraPage.Name = "Handheld Camera [ERROR]";
+                HandheldCameraPage.Color = Color.red;
+                HandheldCameraPage.CreateFunction("An Error Occured", Color.white, null);
+                HandheldCameraPage.CreateFunction("While Loading Resources", Color.white, null);
+                HandheldCameraPage.CreateFunction("Check if you have installed the mod correctly", Color.white, null);
+                HandheldCameraPage.CreateFunction("For more help, click me", Color.white, () =>
+                {
+                    Application.OpenURL("https://github.com/HL2H0/WideEye/issues");
+                    var notification = new ModNotification(ModNotification.ModNotificationType.Other, "WideEye | Success", "Opened the GitHub issues page for WideEye On Desktop", NotificationType.Success, 2);
+                    notification.Show();
+                });
+            }
+            else
+            {
+                HandheldCameraPage.CreateFunction("Spawn Camera", Color.green, HandheldCameraManager.SpawnHandheldCamera);
+                HandheldCameraPage.CreateFunction("Destroy Camera", Color.red, HandheldCameraManager.DestroyHandheldCamera);
+                HandheldCameraPage.CreateFunction("Teleport Camera", Color.cyan, HandheldCameraManager.TeleportHandheldCamera);
+            }
             
             //---------------------------------
             ModSettingsPage = MainPage.CreatePage("Mod Settings", Color.green);

@@ -6,7 +6,7 @@ using Il2CppSLZ.Marrow;
 
 using MelonLoader;
 using BoneLib;
-
+using BoneLib.Notifications;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -69,6 +69,13 @@ namespace WideEye.Core
         {
             yield return new WaitForSeconds(3f);
             SpectatorCameraManager.GetSpectatorCamera(true);
+            if (!ResourcesManager.Loaded)
+            {
+                var notification = new ModNotification(ModNotification.ModNotificationType.Force, "Error",
+                    "Handheld Camera isn't loaded correctly or couldn't be found.", NotificationType.Error, 5);
+                notification.Show();
+                MelonLogger.Error("Handheld Camera isn't loaded correctly or couldn't be found.");
+            }
         }
 
         private void BoneLib_OnLevelUnloaded()
