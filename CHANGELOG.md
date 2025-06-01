@@ -1,6 +1,20 @@
 ﻿
 # WideEye ChangeLog
 
+## [3.0.1] **Hotfix**	
+
+---
+### Added
+* Now the mod will check for the resources file, if it's not found,it notifies the user.
+
+### Fixed
+* Fixed an issue where when you click on `ViewPath` it opens the file instead of showing it in the explorer.
+* Fixed the cameras not syncing FOVs properly.
+* Fixed the view mode not being changed properly.
+
+---
+
+
 ## [3.0.0] **Major Update**
 
 ### Important: New dependency is required [FieldInjector](https://thunderstore.io/c/bonelab/p/WNP78/FieldInjector/)
@@ -65,6 +79,8 @@
 
 ## [1.2.0] **Regular Update**
 
+---
+
 ### Added
 * Smoothing
 * Rotation Offset
@@ -76,8 +92,11 @@
 * Position smoothing may cause the spectator camera to clip through head meshes.
 * Levels with scene chunks may un-find the camera, but it won't affect the modifications the mod made
 
+---
+
 ## [1.1.0] **Regular Update**
 
+---
 ### Added
 * Added ability to toggle post-processing.
 * Added Colors to the mod's menu
@@ -88,7 +107,7 @@
 ### Known Issues
 * Levels with scene chunks may un-find the cam, but it won't affect the modifications the mod made
 
-
+---
 ## [1.0.0]
 
 * Initial Release

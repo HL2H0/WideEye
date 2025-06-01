@@ -1,5 +1,5 @@
-# WideEye 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B01CJHZ5)
+
+# WideEye
 
 > **Note:** These modifications apply only to the *spectator view* and do not affect the VR headset display.
 
@@ -12,7 +12,7 @@
 - **Presets System**: Save and load camera settings; share them easily via `.json` files.
 - removed legacy "Pinned"/"Head" camera modes.
 
----
+---  
 
 ## 🎮 Features
 
@@ -23,42 +23,42 @@
 - **Auto-Apply & Auto-Save** (experimental)
 
 - **Offset Adjustments**
-	- Position
+- Position
 	- Rotation
 
 - **Smoothing** _(Stabilization)_
-	- Position
+- Position
 	- Rotation
 
 - **Avatar Mesh Toggle**
-	- Hair Meshes
+- Hair Meshes
 	- Head Meshes
 
 - **Post-Processing Adjustments**
-	- Auto Exposure
+- Auto Exposure
 	- Chromatic Aberration
 	- Lens Distortion
 
 - **Handheld Camera**
-	- Zoom In/Out
+- Zoom In/Out
 	- Built-in Lighting
 	- Preview Screen
 - **Presets System**
-	- Save/Load settings
+- Save/Load settings
 	- JSON file sharing
 
----
+---  
 
 ## 🎮 Handheld Camera Controls
 
-| Control                       | Action                          |
-|-------------------------------|---------------------------------|
-| Left Handle - Menu Button     | Pin camera in place             |
-| Left Handle - Trigger         | Zoom out                        |
-| Right Handle - Menu Button    | Toggle preview screen           |
-| Right Handle - Trigger        | Zoom in                         |
-
----
+| Control                       | Action                          |  
+|-------------------------------|---------------------------------|  
+| Left Handle - Menu Button     | Pin camera in place             |  
+| Left Handle - Trigger         | Zoom out                        |  
+| Right Handle - Menu Button    | Toggle preview screen           |  
+| Right Handle - Trigger        | Zoom in                         |  
+  
+---  
 
 
 ## 📤 Sharing Presets
@@ -67,25 +67,25 @@ Sharing your camera presets is easy—here’s how:
 
 ### Exporting
 
-1.  Open the **Presets** page and click **View Path**.
+1. Open the **Presets** page and click **View Path**.
 
-2.  Your preset file (`.json`) will be highlighted in the file explorer.
+2. Your preset file (`.json`) will be highlighted in the file explorer.
 
-3.  Copy that file and send it to a friend.
+3. Copy that file and send it to a friend.
 
 
 > As they say: _sharing is caring_.
 
 ### Importing
 
-1.  Have your friend send you their `.json` preset file.
+1. Have your friend send you their `.json` preset file.
 
-2.  Paste the file into this folder: `[GameRootDir]\UserData\WideEye Resources\Presets`
-	- the `[GameRootDir]`  For Steam is  : `C:\Program Files (x86)\Steam\steamapps\common\BONELAB`
-	- For Meta Link : `C:\Program Files\Meta\Software\BONELAB`
+2. Paste the file into this folder: `[GameRootDir]\UserData\WideEye Resources\Presets`
+- the `[GameRootDir]` For Steam is  : `C:\Program Files (x86)\Steam\steamapps\common\BONELAB`
+- For Meta Link : `C:\Program Files\Meta\Software\BONELAB`
 3. Reopen the **Presets** page and you should see the imported preset.
 
----
+---  
 
 ## 📦 Installation
 
@@ -93,11 +93,34 @@ Sharing your camera presets is easy—here’s how:
 2. Extract the contents of the ZIP.
 3. Copy the included `Mods` and `UserData` folders into your BONELAB **root directory**.
 	- Typically found at: `C:\Program Files (x86)\Steam\steamapps\common\BONELAB\`
-    - or `C:\Program Files\Meta\Software\BONELAB\`
+- or `C:\Program Files\Meta\Software\BONELAB\`
 
-Then you are ready to go!
-
+Then you are ready to go!  
 Enjoy WideEye!
+  
+---  
+
+## 💬 GitHub Discussions
+
+WideEye now has a dedicated [Discussions](https://github.com/HL2H0/WideEye/discussions) page! Whether you want to ask a question, share an idea, or show off your setup — there’s a place for you.
+
+### Categories:
+
+-   📢 **Announcements** — Official updates and news.
+
+-   💬 **General** — Open talk about anything WideEye-related.
+
+-   💡 **Ideas** — Suggest features or improvements.
+
+-   📤 **Presets** — Share your custom camera presets.
+
+-   ❓ **Q&A** — Ask questions or get help using the mod.
+
+-   🎥 **Show and Tell** — Post your screenshots, videos, or creative setups using WideEye!
+
+
+Join the conversation here:  
+👉 [github.com/HL2H0/WideEye/discussions](https://github.com/HL2H0/WideEye/discussions)
 
 ---
 
@@ -109,7 +132,7 @@ Enjoy WideEye!
 - [BoneLib 3.1.1](https://thunderstore.io/c/bonelab/p/gnonme/BoneLib/)
 - [FieldInjector 2.1.1](https://thunderstore.io/c/bonelab/p/WNP78/FieldInjector/)
 
----
+---  
 
 ## 📖 Story Behind WideEye
 
@@ -122,20 +145,20 @@ So I thought, “Screw it, I’ll just make a simple mod that changes the FOV wh
 I removed the space, launched the game, pressed “F,” and boom—it worked.
 
 I was so hyped I made a GitHub repo, a quick icon, a menu, and even a README all in one night. And just like that, WideEye was born.
-
----
+  
+---  
 ## 💖 Support
 
 WideEye started as a random “what if?” moment—and now it’s an actual tool people use, which is wild.
 
 If you like what I’m doing and want to help fuel future updates (or just keep me stocked with snacks and caffeine), you can toss a coin my way here:
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B01CJHZ5)
+[Ko-fi – @HL2H0](https://ko-fi.com/hl2h0
 
 No pressure—WideEye will always be free. But every bit of support helps keep the keyboard clacking and the ideas flowing 🧠✨
 
-
----
+  
+---  
 
 ## 🧠 Contributing & Feedback
 
@@ -145,7 +168,7 @@ WideEye is open-source and welcomes suggestions, bug reports, and contributions!
 - Fork the repo and submit pull requests.
 - Leave feedback to help improve future releases.
 
----
+---  
 
 ## 🙌 Credits
 
@@ -158,17 +181,15 @@ WideEye is open-source and welcomes suggestions, bug reports, and contributions!
 - Aiden – [BONELAB Icon Template](https://www.figma.com/community/file/1218386424917309834)
 - TrevTV – [MelonLoader Mod Template](https://github.com/TrevTV/MelonLoader.VSWizard)
 
----
+---  
 
 ## 💡 Future Plans
 
 - MKGlow support
 - Custom UI
 
----
+---  
 
 ## 📜 Changelog
 
 See the [**Releases**](https://github.com/HL2H0/WideEye/releases) page for detailed changelogs.
-
-
