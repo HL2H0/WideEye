@@ -10,6 +10,7 @@ using BoneLib.Notifications;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using WideEye.Behaviors;
 using WideEye.CameraManagers;
 using WideEye.Core;
 using WideEye.Data;
@@ -81,7 +82,9 @@ namespace WideEye.Core
         private void BoneLib_OnLevelUnloaded()
         {
             FoundCamera = false;
-            HandheldCameraManager.DestroyHandheldCamera();
+            if (!HandheldCameraManager.Spawned) return;
+            GameObject.Destroy(HandheldCameraManager.HandheldCamera);
+            HandheldCameraManager.HandheldCamera = null;
             ModMenu.ViewMode.Value = ModEnums.ViewMode.Head;
         }
     }

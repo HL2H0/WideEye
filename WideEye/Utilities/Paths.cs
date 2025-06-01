@@ -15,8 +15,5 @@ public static class Paths
         
         if (!Directory.Exists(PresetsPath))
             Directory.CreateDirectory(PresetsPath);
-        
-        if (!File.Exists(ResourcesPath))
-            File.Create(ResourcesPath);
     }
 }
