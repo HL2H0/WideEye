@@ -1,6 +1,5 @@
-
 # WideEye
-
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B01CJHZ5)
 > **Note:** These modifications apply only to the *spectator view* and do not affect the VR headset display.
 
 **WideEye** is a BONELAB mod built to give creators full control over the spectator camera. From precise FOV tuning to post-processing effects, smoothing, and a powerful handheld camera—WideEye enhances content creation with intuitive tools and customization options.
@@ -153,7 +152,7 @@ WideEye started as a random “what if?” moment—and now it’s an actual too
 
 If you like what I’m doing and want to help fuel future updates (or just keep me stocked with snacks and caffeine), you can toss a coin my way here:
 
-[Ko-fi – @HL2H0](https://ko-fi.com/hl2h0
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B01CJHZ5)
 
 No pressure—WideEye will always be free. But every bit of support helps keep the keyboard clacking and the ideas flowing 🧠✨
 
