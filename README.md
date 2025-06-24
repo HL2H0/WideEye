@@ -16,35 +16,28 @@
 ## 🎮 Features
 
 - **FOV Control**
-
 - **Preferences Saving**
-
 - **Auto-Apply & Auto-Save** (experimental)
-
 - **Offset Adjustments**
-- Position
-	- Rotation
-
+  - Position
+  - Rotation
 - **Smoothing** _(Stabilization)_
-- Position
-	- Rotation
-
+  - Position
+  - Rotation
 - **Avatar Mesh Toggle**
-- Hair Meshes
-	- Head Meshes
-
+  - Hair Meshes
+  - Head Meshes
 - **Post-Processing Adjustments**
-- Auto Exposure
-	- Chromatic Aberration
-	- Lens Distortion
-
+  - Auto Exposure
+  - Chromatic Aberration
+  - Lens Distortion
 - **Handheld Camera**
-- Zoom In/Out
-	- Built-in Lighting
-	- Preview Screen
+  - Zoom In/Out
+  - Built-in Lighting
+  - Preview Screen
 - **Presets System**
-- Save/Load settings
-	- JSON file sharing
+  - Save/Load settings
+  - JSON file sharing
 
 ---  
 
