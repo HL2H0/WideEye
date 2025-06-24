@@ -2,6 +2,7 @@ using System.Diagnostics;
 using MelonLoader;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using BoneLib.BoneMenu;
 using WideEye.Core;
 using WideEye.Utilities;
 using WideEye.UI;
@@ -103,7 +104,7 @@ namespace WideEye.Data
             var path = Path.Combine(Paths.PresetsPath, $"{presetName}.json");
             if (!File.Exists(path)) return;
             MelonLogger.Msg($"Path: {path}");
-            ProcessStartInfo processStartInfo = new("explorer.exe", $"/select {path}");
+            ProcessStartInfo processStartInfo = new("explorer.exe", $"/select, \"{path}\"");
             Process.Start(processStartInfo);
         }
 
