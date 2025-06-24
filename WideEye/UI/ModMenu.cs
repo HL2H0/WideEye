@@ -28,13 +28,12 @@ namespace WideEye.UI
         private static Page PresetsPage { get; set; }
         public static Page HandheldCameraPage { get; private set; }
         private static Page RotationOffsetPage { get; set; }
+        private static Page NotificationPage { get; set; }
         
         
         //---------- | Smoothing Page | ----------
         public static FloatElement PSmoothing { get; private set; }
         public static FloatElement RSmoothing { get; private set; }
-        
-        
 
         
         
@@ -93,6 +92,7 @@ namespace WideEye.UI
         
         //---------- | Mod Settings Page | ----------
         private static Page ModSettingsPage { get; set; }
+        
         public static BoolElement AutoSave { get; private set; }
         public static BoolElement OtherNotifi { get; private set; }
         public static BoolElement PrefNotifi { get; private set; }
@@ -108,7 +108,7 @@ namespace WideEye.UI
                CreateOnePresetPage(preset.Name);
             }
         }
-
+        
         public static void CreateOnePresetPage(string presetName)
         {
             var preset = PresetsManager.Presets[presetName];
@@ -276,15 +276,15 @@ namespace WideEye.UI
             
             //---------------------------------
             ModSettingsPage = MainPage.CreatePage("Mod Settings", Color.green);
-            
+            NotificationPage = MainPage.CreatePage("Notification", Color.magenta);
             PrefNotifi =
-                ModSettingsPage.CreateBool("Preferences Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
+                NotificationPage.CreateBool("Preferences Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
             CameraDisabledNotifi = 
-                ModSettingsPage.CreateBool("Camera Disabled Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
+                NotificationPage.CreateBool("Camera Disabled Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
             CameraFoundNotifi =
-                ModSettingsPage.CreateBool("Camera Found Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
+                NotificationPage.CreateBool("Camera Found Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
             OtherNotifi = 
-                ModSettingsPage.CreateBool("Other Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
+                NotificationPage.CreateBool("Other Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
             
             AutoSave = ModSettingsPage.CreateBool("Auto Save (Experimental)", Color.yellow, false, v => ModPreferences.AutoSave = v);
             ModSettingsPage.CreateBool("Head Meshes", Color.yellow, true, value => SettingsApplier.ApplyOther(ModEnums.OtherType.HeadMesh, value));
@@ -293,7 +293,7 @@ namespace WideEye.UI
             ModSettingsPage.CreateFunction("Load Preferences", Color.green, ModPreferences.LoadPref);
             ModSettingsPage.CreateFunction("Clear All Preferences", Color.red, ModPreferences.ClearPref);
             
-            SupportPage = ModSettingsPage.CreatePage("Support", Color.white);
+            SupportPage = MainPage.CreatePage("Support", Color.white);
             SupportPage.CreateFunction("Open GitHub Issues", Color.white, () =>
             {
                 Application.OpenURL("https://github.com/HL2H0/WideEye/issues");
