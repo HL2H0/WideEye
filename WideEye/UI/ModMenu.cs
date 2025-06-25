@@ -275,7 +275,7 @@ namespace WideEye.UI
             }
             
             //---------------------------------
-            ModSettingsPage = MainPage.CreatePage("Mod Settings", Color.green);
+            ModSettingsPage = ModSettingsPage.CreatePage("Mod Settings", Color.green);
             NotificationPage = MainPage.CreatePage("Notification", Color.magenta);
             PrefNotifi =
                 NotificationPage.CreateBool("Preferences Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
