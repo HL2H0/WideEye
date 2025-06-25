@@ -9,9 +9,12 @@ public class FreeCam : MonoBehaviour
     public float sensitivity = 3f;
     
     private bool _isLooking;
+    private bool _EnableFreeCam = true;
 
     private void Update()
     {
+        if (!_EnableFreeCam) return;
+        
         var fastMove = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         var speed = fastMove ? fastMoveSpeed : moveSpeed;
         
@@ -29,8 +32,8 @@ public class FreeCam : MonoBehaviour
         //Freecam Rotation
         if(_isLooking) 
         {
-            var rotationX = transform.localEulerAngles.x + Input.GetAxis("Mouse X") * sensitivity;
-            var rotationY = transform.localEulerAngles.y - Input.GetAxis("Mouse Y") * sensitivity;
+            var rotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * sensitivity;
+            var rotationY = transform.localEulerAngles.x - Input.GetAxis("Mouse Y") * sensitivity;
             transform.localEulerAngles = new Vector3(rotationX, rotationY, 0f);
         }
         
@@ -54,5 +57,12 @@ public class FreeCam : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         _isLooking = false;
+        _EnableFreeCam = false;
+    }
+    private void OnEnable()
+    {
+        _EnableFreeCam = true;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 }
