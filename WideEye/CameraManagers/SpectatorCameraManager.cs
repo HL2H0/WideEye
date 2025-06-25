@@ -17,7 +17,7 @@ public static class SpectatorCameraManager
     {
         if (HelperMethods.IsAndroid())
         {
-            var notification = new ModNotification(ModNotification.ModNotificationType.Force, "WideEye | Error", "WideEye doesn't work with Android", NotificationType.Error, 3f);
+            var notification = new ModNotification(ModNotification.ModNotificationType.Force, "WideEye | Error", "WideEye doesn't work with Quest", NotificationType.Error, 3f);
             notification.Show();
         }
         else
@@ -58,8 +58,6 @@ public static class SpectatorCameraManager
                 GetPostFXOverrides();
                 if (isAuto)
                 {
-                    var notification = new ModNotification(ModNotification.ModNotificationType.CameraFound, "WideEye | Success", "Found camera automatically", NotificationType.Success, 3);
-                    notification.Show();
                     MelonLogger.Msg(ConsoleColor.Green, "Found camera automatically");
                 }
                 else

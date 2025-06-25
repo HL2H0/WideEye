@@ -110,8 +110,6 @@ namespace WideEye.Data
             SettingsApplier.ApplyLd(_prefLdEnabled.Value, _prefLdCenter.Value, _prefLdIntensity.Value, _prefLdScale.Value, _prefLdXMultiplier.Value, _prefLdYMultiplier.Value, true);
             SettingsApplier.ApplyCa(_prefCaEnabled.Value, _prefCaIntensity.Value, true);
             SettingsApplier.ApplyAe(_prefAeEnabled.Value, _prefAeAdaptationMode.Value, _prefAeD2Ls.Value, _prefAeEvCompensation.Value, _prefAeEvMax.Value, _prefAeEvMin.Value, _prefAeL2Ds.Value, _prefAeMeteringMask.Value, _prefAeMetProcedFalloff.Value, true);
-            var notification = new ModNotification(ModNotification.ModNotificationType.Preferences, "WideEye | Success", "Loaded Preferences.", NotificationType.Success, 2);
-            notification.Show();
             MelonLogger.Msg(ConsoleColor.Green, "Loaded Preferences.");
         }
 
