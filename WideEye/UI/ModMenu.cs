@@ -277,6 +277,8 @@ namespace WideEye.UI
             //---------------------------------
             ModSettingsPage = ModSettingsPage.CreatePage("Mod Settings", Color.green);
             NotificationPage = MainPage.CreatePage("Notification", Color.magenta);
+            ModSettingsPage = MainPage.CreatePage("Mod Settings", Color.green);
+            NotificationPage = ModSettingsPage.CreatePage("Notification", Color.magenta);
             PrefNotifi =
                 NotificationPage.CreateBool("Preferences Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
             CameraDisabledNotifi = 
