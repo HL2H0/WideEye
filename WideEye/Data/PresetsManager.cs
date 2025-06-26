@@ -34,11 +34,6 @@ namespace WideEye.Data
                 {
                     MelonLogger.Error($"Preset {preset} Couldn't be Loaded");
                 }
-                
-            }
-            foreach (var preset in Presets)
-            {
-                MelonLogger.Msg($"- {preset.Key} | {preset.Value.Name} | {preset.Value.Version}");
             }
         }
 
