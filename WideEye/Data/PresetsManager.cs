@@ -2,7 +2,6 @@ using System.Diagnostics;
 using MelonLoader;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using BoneLib.BoneMenu;
 using WideEye.Core;
 using WideEye.Utilities;
 using WideEye.UI;

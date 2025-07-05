@@ -26,7 +26,8 @@ namespace WideEye.UI
         private static Page LensDistortionPage { get; set; }
         private static Page ViewPage { get; set; }
         private static Page PresetsPage { get; set; }
-        public static Page HandheldCameraPage { get; private set; }
+        private static Page HandheldCameraPage { get; set; }
+        private static Page FreeCamPage { get; set; }
         private static Page RotationOffsetPage { get; set; }
         private static Page NotificationPage { get; set; }
         
@@ -39,6 +40,18 @@ namespace WideEye.UI
         
         //---------- | View Page | ----------
         public static EnumElement ViewMode { get; private set; }
+        
+        //---------- | Free Cam Page | ----------
+        public static FloatElement FreeCamSpeed { get; private set; }
+        public static FloatElement FreeCamFastSpeed { get; private set; }
+        public static FloatElement FreeCamSensitivity { get; private set; }
+        public static FloatElement FreeCamSmoothSpeed { get; private set; }
+        public static FloatElement FreeCamScrollSensitivity { get; private set; }
+        public static FloatElement FreeCamScrollSmoothing { get; private set; }
+        public static BoolElement FreeCamShowIndicator { get; private set; }
+        
+        
+        
         
         //---------- | Rotation Offset Page | ----------
         public static FloatElement XrOffset { get; private set; }
@@ -98,6 +111,7 @@ namespace WideEye.UI
         public static BoolElement PrefNotifi { get; private set; }
         public static BoolElement CameraDisabledNotifi { get; private set; }
         public static BoolElement CameraFoundNotifi { get; private set; }
+        public static IntElement StartupDelay { get; private set; }
 
 
         public static void CreatePresetsPage()
@@ -115,11 +129,6 @@ namespace WideEye.UI
             var page = PresetsPage.CreatePage(presetName, Color.white);
             if (preset != null)
             {
-                if (preset.Version != BuildInfo.Version)
-                {
-                    page.Color = Color.yellow;
-                    page.Name = $"{page.Name} [OUTDATED]";
-                }
                 page.CreateFunction("Save Current Setting To This", Color.cyan, () => PresetsManager.SavePreset(presetName));
                 page.CreateFunction("Load This Preset", Color.green, () => PresetsManager.ApplyPreset(presetName));
                 page.CreateFunction("View Path", Color.yellow, () => PresetsManager.ViewPath(presetName));
@@ -274,10 +283,26 @@ namespace WideEye.UI
                 HandheldCameraPage.CreateFunction("Teleport Camera", Color.cyan, HandheldCameraManager.TeleportHandheldCamera);
             }
             
+            FreeCamPage = ViewPage.CreatePage("FreeCam Settings", Color.white);
+            FreeCamSpeed = FreeCamPage.CreateFloat("Move Speed", Color.white, 3f, 1, 0, float.MaxValue, v => FreeCamManager.MoveSpeed = v);
+            FreeCamFastSpeed = FreeCamPage.CreateFloat("Fast Move Speed", Color.white, 7f, 1, 0, float.MaxValue,v => FreeCamManager.FastMoveSpeed = v);
+            FreeCamSensitivity = FreeCamPage.CreateFloat("Mouse Sensitivity", Color.white, 3f, 1, 0, float.MaxValue,v => FreeCamManager.Sensitivity = v);
+            FreeCamSmoothSpeed = FreeCamPage.CreateFloat("Smooth Speed", Color.white, 10f, 1, 0, float.MaxValue,v => FreeCamManager.SmoothSpeed = v);
+            FreeCamScrollSensitivity = FreeCamPage.CreateFloat("Scroll Sensitivity", Color.white, 15f, 1, 0, float.MaxValue,v => FreeCamManager.ScrollSensitivity = v);
+            FreeCamScrollSmoothing = FreeCamPage.CreateFloat("Scroll Smoothing", Color.white, 10f, 1, 0, float.MaxValue,v => FreeCamManager.ScrollSmoothing = v);
+            FreeCamShowIndicator = FreeCamPage.CreateBool("Show Indicator", Color.white, true, v => FreeCamManager.ShowIndicator = v);
+            
+            
             //---------------------------------
-            ModSettingsPage = ModSettingsPage.CreatePage("Mod Settings", Color.green);
-            NotificationPage = MainPage.CreatePage("Notification", Color.magenta);
             ModSettingsPage = MainPage.CreatePage("Mod Settings", Color.green);
+
+            StartupDelay = ModSettingsPage.CreateInt("Startup Delay (Seconds)", Color.cyan, 5, 1, 2, int.MaxValue, v => ModPreferences.StartupDelay = v);
+            AutoSave = ModSettingsPage.CreateBool("Auto Save (Experimental)", Color.yellow, false, v => ModPreferences.AutoSave = v);
+            ModSettingsPage.CreateBool("Head Meshes", Color.yellow, true, value => SettingsApplier.ApplyOther(ModEnums.OtherType.HeadMesh, value));
+            ModSettingsPage.CreateBool("Hair Meshes", Color.yellow, true, value => SettingsApplier.ApplyOther(ModEnums.OtherType.HairMeshes, value));
+            ModSettingsPage.CreateFunction("Reset All To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.All));
+            ModSettingsPage.CreateFunction("Load Preferences", Color.green, ModPreferences.LoadPref);
+            ModSettingsPage.CreateFunction("Clear All Preferences", Color.red, ModPreferences.ClearPref);
             NotificationPage = ModSettingsPage.CreatePage("Notification", Color.magenta);
             PrefNotifi =
                 NotificationPage.CreateBool("Preferences Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
@@ -287,13 +312,7 @@ namespace WideEye.UI
                 NotificationPage.CreateBool("Camera Found Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
             OtherNotifi = 
                 NotificationPage.CreateBool("Other Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
-            
-            AutoSave = ModSettingsPage.CreateBool("Auto Save (Experimental)", Color.yellow, false, v => ModPreferences.AutoSave = v);
-            ModSettingsPage.CreateBool("Head Meshes", Color.yellow, true, value => SettingsApplier.ApplyOther(ModEnums.OtherType.HeadMesh, value));
-            ModSettingsPage.CreateBool("Hair Meshes", Color.yellow, true, value => SettingsApplier.ApplyOther(ModEnums.OtherType.HairMeshes, value));
-            ModSettingsPage.CreateFunction("Reset All To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.All));
-            ModSettingsPage.CreateFunction("Load Preferences", Color.green, ModPreferences.LoadPref);
-            ModSettingsPage.CreateFunction("Clear All Preferences", Color.red, ModPreferences.ClearPref);
+
             
             SupportPage = MainPage.CreatePage("Support", Color.white);
             SupportPage.CreateFunction("Open GitHub Issues", Color.white, () =>

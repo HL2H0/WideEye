@@ -1,7 +1,5 @@
-using WideEye.Behaviors;
+using BoneLib;
 using WideEye.Core;
-using WideEye.UI;
-using WideEye.Utilities;
 
 namespace WideEye.CameraManagers;
 
@@ -9,18 +7,28 @@ public static class CameraController
 {
     public static void UpdateView(ModEnums.ViewMode viewMode)
     {
-        var script = HandheldCameraManager.HandheldCamera.GetComponent<HandheldCameraScript>();
-        if (!script) return;
-        var result = viewMode switch
+        
+        switch (viewMode)
         {
-            ModEnums.ViewMode.Head => (null, Mod.StTransform),
-            ModEnums.ViewMode.Handheld when HandheldCameraManager.Spawned =>
-                (Mod.ScCameraComponent, script.cameraTarget),
-            _ => (script.SyncCamera, Mod.ScSmootherComponent.targetTransform)
-        };
-        script.SyncCamera = result.Item1;
-        Mod.ScSmootherComponent.targetTransform = result.Item2;
-
-        SettingsApplier.ApplyFOV(viewMode == ModEnums.ViewMode.Handheld ? script.FOV : ModMenu.FOVSlider.Value);
+            case ModEnums.ViewMode.Head:
+                Mod.ScSmootherComponent.targetTransform = Mod.StTransform;
+                if (HandheldCameraManager.Spawned) HandheldCameraManager.ActiveHandheldCameraScript.SyncCamera = null;
+                FreeCamManager.FreeCamObject.SetActive(false);
+                break;
+            
+            case ModEnums.ViewMode.Handheld:
+                if(!HandheldCameraManager.Spawned) return;
+                Mod.ScSmootherComponent.targetTransform = HandheldCameraManager.ActiveHandheldCameraScript.cameraTarget;
+                FreeCamManager.FreeCamObject.SetActive(false);
+                break;
+            
+            case ModEnums.ViewMode.FreeCam:
+                Mod.ScSmootherComponent.targetTransform = FreeCamManager.FreeCamObject.transform;
+                if (HandheldCameraManager.Spawned) HandheldCameraManager.ActiveHandheldCameraScript.SyncCamera = null;
+                FreeCamManager.FreeCamObject.transform.position = Player.Head.position;
+                FreeCamManager.FreeCamObject.transform.rotation = Player.Head.rotation;
+                FreeCamManager.FreeCamObject.SetActive(true);
+                break;
+        }
     }
 }

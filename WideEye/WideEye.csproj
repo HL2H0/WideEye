@@ -6,7 +6,7 @@
 		<RootNamespace>WideEye</RootNamespace>
 		<LangVersion>default</LangVersion>
 		<IsPackable>false</IsPackable>
-		<AssemblyVersion>3.0.1.0</AssemblyVersion>
+		<AssemblyVersion>3.1.0.0</AssemblyVersion>
 		<FileVersion>1.0.0.0</FileVersion>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<AssemblyName>WideEye</AssemblyName>
@@ -15,8 +15,10 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <Compile Include="Behaviors\CustomGripEvents.cs" />
+	  <Compile Include="Behaviors\FreeCam.cs" />
 	  <Compile Include="Behaviors\HandheldCameraScript.cs" />
 	  <Compile Include="CameraManagers\CameraController.cs" />
+	  <Compile Include="CameraManagers\FreeCamManager.cs" />
 	  <Compile Include="CameraManagers\HandheldCameraManager.cs" />
 	  <Compile Include="CameraManagers\SpectatorCameraManager.cs" />
 	  <Compile Include="Core\BuildInfo.cs" />

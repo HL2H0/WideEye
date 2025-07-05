@@ -10,7 +10,6 @@ using BoneLib.Notifications;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using WideEye.Behaviors;
 using WideEye.CameraManagers;
 using WideEye.Core;
 using WideEye.Data;
@@ -62,20 +61,30 @@ namespace WideEye.Core
 
         private void BoneLib_OnUIRigCreated()
         {
-            MelonCoroutines.Start(WaitForCameraRig());
+            MelonCoroutines.Start(StartWideEye(ModPreferences.StartupDelay));
             MelonLogger.Msg(System.ConsoleColor.Green, "UI Rig Created, Trying To Get Camera...");
         }
         
-        private static IEnumerator WaitForCameraRig()
+        private static IEnumerator StartWideEye(float waitTime)
         {
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(waitTime);
+            
             SpectatorCameraManager.GetSpectatorCamera(true);
+            
+            FreeCamManager.Init();
+            ModPreferences.LoadPref();
             if (!ResourcesManager.Loaded)
             {
                 var notification = new ModNotification(ModNotification.ModNotificationType.Force, "Error",
-                    "Handheld Camera isn't loaded correctly or couldn't be found.", NotificationType.Error, 5);
+                    "Mod resources isn't loaded correctly or couldn't be found.", NotificationType.Error, 5);
                 notification.Show();
-                MelonLogger.Error("Handheld Camera isn't loaded correctly or couldn't be found.");
+                MelonLogger.Error("Mod resources isn't loaded correctly or couldn't be found.");
+            }
+            else
+            {
+                var notification = new ModNotification(ModNotification.ModNotificationType.CameraFound, "Success",
+                    "WideEye Has Launched Without errors (=", NotificationType.Success, 2);
+                notification.Show();
             }
         }
 

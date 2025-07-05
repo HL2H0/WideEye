@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 using WideEye.Core;
-using WideEye.Data;
 using WideEye.UI;
 
 namespace WideEye.CameraManagers;
@@ -29,7 +28,7 @@ public static class SpectatorCameraManager
             {
                 if (isAuto)
                 {
-                    var notification = new ModNotification(ModNotification.ModNotificationType.Force, "WideEye | Error", "Couldn't find the camera automatically.\nPlease open WideEye's menu and find it manually.", NotificationType.Error, 3);
+                    var notification = new ModNotification(ModNotification.ModNotificationType.Force, "WideEye | Error", "Couldn't find the camera automatically.\nChange startup delay then reload the map", NotificationType.Error, 3);
                     notification.Show();
                     MelonLogger.Error("Couldn't find the camera automatically");
                     ModMenu.MainPage.Add(ModMenu.GetCameraButton);
@@ -67,8 +66,6 @@ public static class SpectatorCameraManager
                     notification.Show();
                     MelonLogger.Msg(ConsoleColor.Green, "Found camera manually");
                 }
-
-                ModPreferences.LoadPref();
                 Mod.FoundCamera = true;
             }
         }
