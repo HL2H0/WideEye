@@ -1,4 +1,5 @@
-﻿using BoneLib.BoneMenu;
+﻿using System.Diagnostics;
+using BoneLib.BoneMenu;
 using BoneLib.Notifications;
 using Il2CppOccaSoftware.Exposure.Runtime;
 using UnityEngine;
@@ -12,9 +13,6 @@ namespace WideEye.UI
 {
     public static class ModMenu
     {
-        public static FunctionElement GetCameraButton = new("Get Camera", Color.red, () => SpectatorCameraManager.GetSpectatorCamera(false));
-        
-        
         //---------- | Main Page | ----------
         public static Page MainPage;
         public static FloatElement FOVSlider { get; private set; }
@@ -23,13 +21,12 @@ namespace WideEye.UI
         private static Page AutoExposurePage { get; set; }
         private static Page PostFXPage { get; set; }
         private static Page SmoothingPage { get; set; }
+        private static Page AvatarMeshesPage { get; set; }
         private static Page LensDistortionPage { get; set; }
         private static Page ViewPage { get; set; }
         private static Page PresetsPage { get; set; }
         private static Page HandheldCameraPage { get; set; }
         private static Page FreeCamPage { get; set; }
-        private static Page RotationOffsetPage { get; set; }
-        private static Page NotificationPage { get; set; }
         
         
         //---------- | Smoothing Page | ----------
@@ -40,6 +37,8 @@ namespace WideEye.UI
         
         //---------- | View Page | ----------
         public static EnumElement ViewMode { get; private set; }
+        public static BoolElement ChangeViewOnSpawn { get; private set; }
+        public static EnumElement AudioSource { get; private set; }
         
         //---------- | Free Cam Page | ----------
         public static FloatElement FreeCamSpeed { get; private set; }
@@ -60,7 +59,6 @@ namespace WideEye.UI
         
         
         //---------- | Position Offset Page | ----------
-        private static Page PositionOffsetPage { get; set; }
         public static FloatElement XpOffset { get; private set; }
         public static FloatElement YpOffset { get; private set; }
         public static FloatElement ZpOffset { get; private set; }
@@ -70,6 +68,10 @@ namespace WideEye.UI
         //---------- | Post-Processing Page | ----------
         public static BoolElement PostFXToggle { get; private set; }
 
+        //---------- | MKGlow Page | ----------
+        
+        private static Page MkGlowPage { get; set; }
+        public static BoolElement MkGlowEnabled { get; private set; }
         
         
         //---------- | Chromatic Aberration Page | ----------
@@ -104,13 +106,9 @@ namespace WideEye.UI
         
         
         //---------- | Mod Settings Page | ----------
-        private static Page ModSettingsPage { get; set; }
+        public static Page ModSettingsPage { get; set; }
         
         public static BoolElement AutoSave { get; private set; }
-        public static BoolElement OtherNotifi { get; private set; }
-        public static BoolElement PrefNotifi { get; private set; }
-        public static BoolElement CameraDisabledNotifi { get; private set; }
-        public static BoolElement CameraFoundNotifi { get; private set; }
         public static IntElement StartupDelay { get; private set; }
 
 
@@ -132,6 +130,19 @@ namespace WideEye.UI
                 page.CreateFunction("Save Current Setting To This", Color.cyan, () => PresetsManager.SavePreset(presetName));
                 page.CreateFunction("Load This Preset", Color.green, () => PresetsManager.ApplyPreset(presetName));
                 page.CreateFunction("View Path", Color.yellow, () => PresetsManager.ViewPath(presetName));
+                var valuesPage = page.CreatePage("Values [Experimental]", Color.magenta);
+                foreach (var property in preset.GetType().GetProperties())
+                {
+                    valuesPage.CreateFunction($"{property.Name} : {property.GetValue(preset)}", Color.white, null);
+                }
+                page.CreateFunction("Delete This Preset", Color.red, () => 
+                {
+                    PresetsManager.DeletePreset(presetName);
+                    page.Name = $"[Deleted] {presetName}";
+                    page.RemoveAll();
+                    page.CreateFunction("This Preset Has Been Deleted", Color.white, null);
+                    page.CreateFunction("Page will be deleted in next game launch", Color.white, null);
+                });
             }
             else
             {
@@ -152,6 +163,7 @@ namespace WideEye.UI
                 PosOffset = new SerializableVector3(new Vector3(XpOffset.Value, YpOffset.Value, ZpOffset.Value)),
                 RotOffset = new SerializableVector3(new Vector3(XrOffset.Value, YrOffset.Value, ZrOffset.Value)),
                 PostFXEnabled = PostFXToggle.Value,
+                MkGlowEnabled = MkGlowEnabled.Value,
                 CaEnabled = CaEnabled.Value,
                 CaIntensity = CaIntensity.Value,
                 LdEnabled = LdEnabled.Value,
@@ -174,114 +186,124 @@ namespace WideEye.UI
 
         public static void SetupBoneMenu()
         {
-            MainPage = Page.Root.CreatePage("WideEye", Color.white);
-            FOVSlider = MainPage.CreateFloat("FOV", Color.cyan, 72f, 1f, float.MinValue, float.MaxValue, value => SettingsApplier.ApplyFOV(value));
-            MainPage.CreateFunction("Reset To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.Fov));
-            MainPage.CreateFunction("Save Preferences", Color.green, ModPreferences.SavePref);
+            
+            MainPage = Page.Root.CreatePage("WideEye", new Color(0.474f, 0.314f, 0.98f));
+            FOVSlider = MainPage.CreateFloat("FOV", Color.cyan, 72f, 1f, float.MinValue, float.MaxValue, value => SettingsUpdater.UpdateFOV(value));
+            MainPage.CreateFunction("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.Fov));
+            MainPage.CreateFunction("Save Preferences", Color.green, ModPreferences.SavePreferences);
             
             //---------------------------------
-            
+
             PostFXPage = MainPage.CreatePage("Post-Processing", Color.yellow);
-            
-            PostFXToggle = PostFXPage.CreateBool("Enabled", Color.yellow, true, value => SettingsApplier.ApplyOther(ModEnums.OtherType.PostFX, value));
+            PostFXToggle = PostFXPage.CreateBool("Enabled", Color.yellow, true, value => SettingsUpdater.TogglePostFX(value));
             
             //---------------------------------
             
+            MkGlowPage = PostFXPage.CreatePage("MKGlow", Color.white);
+            MkGlowEnabled = MkGlowPage.CreateBool("Enabled", Color.cyan, true, _ => SettingsUpdater.UpdateMkGlow());
+            MkGlowPage.CreateFunction("More Features are coming soon!", Color.white, null);
+            MkGlowPage.CreateFunction("Reset To Default", Color.red , () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.MKGlow));
+            
+            //---------------------------------
             LensDistortionPage = PostFXPage.CreatePage("Lens Distortion", Color.white);
-            LdEnabled = LensDistortionPage.CreateBool("Enabled", Color.white, true, _ => SettingsApplier.ApplyLd());
-            LdCenterX = LensDistortionPage.CreateFloat("Center X", Color.red, 0.50f, 0.1f, 0f, 1f, _ => SettingsApplier.ApplyLd());
-            LdCenterY = LensDistortionPage.CreateFloat("Center Y", Color.green, 0.50f, 0.1f, 0f, 1f, _ => SettingsApplier.ApplyLd());
-            LdIntensity = LensDistortionPage.CreateFloat("Intensity", Color.white, 0.48f, 0.01f, 0f, 1f, _ => SettingsApplier.ApplyLd());
-            LdScale = LensDistortionPage.CreateFloat("Scale", Color.white, 1f, 0.1f, 0, 1, _ => SettingsApplier.ApplyLd());
-            LdXMultiplier = LensDistortionPage.CreateFloat("X Multiplier", Color.red, 0.59f, 0.01f, 0f, 1f, _ => SettingsApplier.ApplyLd());
-            LdYMultiplier = LensDistortionPage.CreateFloat("Y Multiplier", Color.green, 1f, 0.01f, 0f, 1f, _ => SettingsApplier.ApplyLd());
-            LensDistortionPage.CreateFunction("Reset To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.LensDistortion));
+            LdEnabled = LensDistortionPage.CreateBool("Enabled", Color.cyan, true, _ => SettingsUpdater.UpdateLensDistortion());
+            LdCenterX = LensDistortionPage.CreateFloat("Center X", Color.red, 0.50f, 0.1f, 0f, 1f, _ => SettingsUpdater.UpdateLensDistortion());
+            LdCenterY = LensDistortionPage.CreateFloat("Center Y", Color.green, 0.50f, 0.1f, 0f, 1f, _ => SettingsUpdater.UpdateLensDistortion());
+            LdIntensity = LensDistortionPage.CreateFloat("Intensity", Color.white, 0.48f, 0.01f, 0f, 1f, _ => SettingsUpdater.UpdateLensDistortion());
+            LdScale = LensDistortionPage.CreateFloat("Scale", Color.white, 1f, 0.1f, 0, 1, _ => SettingsUpdater.UpdateLensDistortion());
+            LdXMultiplier = LensDistortionPage.CreateFloat("X Multiplier", Color.red, 0.59f, 0.01f, 0f, 1f, _ => SettingsUpdater.UpdateLensDistortion());
+            LdYMultiplier = LensDistortionPage.CreateFloat("Y Multiplier", Color.green, 1f, 0.01f, 0f, 1f, _ => SettingsUpdater.UpdateLensDistortion());
+            LensDistortionPage.CreateFunction("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.LensDistortion));
             
             //---------------------------------
             
             ChromaticAberrationPage = PostFXPage.CreatePage("ChromaticAberration", Color.white);
-            CaEnabled = ChromaticAberrationPage.CreateBool("Enabled", Color.white, true, _ => SettingsApplier.ApplyCa());
-            CaIntensity = ChromaticAberrationPage.CreateFloat("Intensity", Color.white, 0.123f, 0.01f, 0f, 1f, _ => SettingsApplier.ApplyCa());
-            ChromaticAberrationPage.CreateFunction("Reset To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.ChromaticAberration));
+            CaEnabled = ChromaticAberrationPage.CreateBool("Enabled", Color.cyan, true, _ => SettingsUpdater.UpdateChromaticAberration());
+            CaIntensity = ChromaticAberrationPage.CreateFloat("Intensity", Color.white, 0.123f, 0.01f, 0f, 1f, _ => SettingsUpdater.UpdateChromaticAberration());
+            ChromaticAberrationPage.CreateFunction("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.ChromaticAberration));
             
             //---------------------------------
             
             AutoExposurePage = PostFXPage.CreatePage("AutoExposure", Color.white);
-            AeEnabled = AutoExposurePage.CreateBool("Enabled", Color.white, true, _ => SettingsApplier.ApplyAe());
-            AeAdaptationMode = AutoExposurePage.CreateEnum("Adaptation Mode", Color.white, AutoExposureAdaptationMode.Progressive, _ => SettingsApplier.ApplyAe());
-            AeD2Ls = AutoExposurePage.CreateFloat("Dark To Light Speed", Color.white, 3f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyAe());
-            AeEvCompensation = AutoExposurePage.CreateFloat("EV Compensation", Color.white, 2.5f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyAe());
-            AeEvMax = AutoExposurePage.CreateFloat("EV Max", Color.white, 1.2f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyAe());
-            AeEvMin = AutoExposurePage.CreateFloat("EV Min", Color.white, -1.2f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyAe());
-            AeL2Ds = AutoExposurePage.CreateFloat("Light To Dark Speed", Color.white, 1f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyAe());
+            AeEnabled = AutoExposurePage.CreateBool("Enabled", Color.cyan, true, _ => SettingsUpdater.UpdateAutoExposure());
+            AeAdaptationMode = AutoExposurePage.CreateEnum("Adaptation Mode", Color.white, AutoExposureAdaptationMode.Progressive, _ => SettingsUpdater.UpdateAutoExposure());
+            AeD2Ls = AutoExposurePage.CreateFloat("Dark To Light Speed", Color.white, 3f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateAutoExposure());
+            AeEvCompensation = AutoExposurePage.CreateFloat("EV Compensation", Color.white, 2.5f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateAutoExposure());
+            AeEvMax = AutoExposurePage.CreateFloat("EV Max", Color.white, 1.2f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateAutoExposure());
+            AeEvMin = AutoExposurePage.CreateFloat("EV Min", Color.white, -1.2f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateAutoExposure());
+            AeL2Ds = AutoExposurePage.CreateFloat("Light To Dark Speed", Color.white, 1f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateAutoExposure());
             AeMeteringMaskMode = AutoExposurePage.CreateEnum("Metering Mask Mode", Color.white, AutoExposureMeteringMaskMode.Procedural, null);
-            AeMeteringProceduralFalloff = AutoExposurePage.CreateFloat("Metering Procedural Falloff", Color.white, 2f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyAe());
-            AutoExposurePage.CreateFunction("Reset To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.AutoExposure));
+            AeMeteringProceduralFalloff = AutoExposurePage.CreateFloat("Metering Procedural Falloff", Color.white, 2f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateAutoExposure());
+            AutoExposurePage.CreateFunction("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.AutoExposure));
+            
+            //---------------------------------
+            
+            AvatarMeshesPage = MainPage.CreatePage("Avatar Meshes Toggles", Color.yellow); 
+            AvatarMeshesPage.CreateFunction("Toggle Head Mesh Offset", Color.cyan, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HeasdMeshOffset));
+            AvatarMeshesPage.CreateFunction("Toggle Head Meshes", Color.white, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HeadMesh));
+            AvatarMeshesPage.CreateFunction("Toggle Hair Meshes", Color.white, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HairMeshes));
+            AvatarMeshesPage.CreateFunction("-------------------", Color.white, null);
+            AvatarMeshesPage.CreateFunction("Note: You might need to", Color.yellow, null);
+            AvatarMeshesPage.CreateFunction("Press the button twice", Color.yellow, null);
             
             //---------------------------------
             
             OffsetPage = MainPage.CreatePage("Offset", Color.white);
-            RotationOffsetPage = OffsetPage.CreatePage("Rotation Offset", Color.white);
-            XrOffset = RotationOffsetPage.CreateFloat("X Rotation Offset", Color.red, 11f, 1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyOffset(ModEnums.OffsetType.Rotation));
-            YrOffset = RotationOffsetPage.CreateFloat("Y Rotation Offset", Color.green, 0f, 1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyOffset(ModEnums.OffsetType.Rotation));
-            ZrOffset = RotationOffsetPage.CreateFloat("Z Rotation Offset", Color.blue, 0f, 1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyOffset(ModEnums.OffsetType.Rotation));
-            RotationOffsetPage.CreateFunction("Reset To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.RotationOffset));
             
-            //---------------------------------
-            
-            PositionOffsetPage = OffsetPage.CreatePage("Position Offset", Color.white);
-            XpOffset = PositionOffsetPage.CreateFloat("X Position Offset", Color.red, 0f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyOffset(ModEnums.OffsetType.Position));
-            YpOffset = PositionOffsetPage.CreateFloat("Y Position Offset", Color.green, 0f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyOffset(ModEnums.OffsetType.Position));
-            ZpOffset = PositionOffsetPage.CreateFloat("Z Position Offset", Color.blue, 0f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsApplier.ApplyOffset(ModEnums.OffsetType.Position));
-            PositionOffsetPage.Add(new FunctionElement("Reset To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.PositionOffset)));
+            XrOffset = OffsetPage.CreateFloat("X Rotation Offset", Color.red, 11f, 1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateOffset(ModEnums.OffsetType.Rotation));
+            YrOffset = OffsetPage.CreateFloat("Y Rotation Offset", Color.green, 0f, 1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateOffset(ModEnums.OffsetType.Rotation));
+            ZrOffset = OffsetPage.CreateFloat("Z Rotation Offset", Color.blue, 0f, 1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateOffset(ModEnums.OffsetType.Rotation));
+            OffsetPage.CreateFunction("--------------------", Color.white, null).SetProperty(ElementProperties.NoBorder);
+            XpOffset = OffsetPage.CreateFloat("X Position Offset", Color.red, 0f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateOffset(ModEnums.OffsetType.Position));
+            YpOffset = OffsetPage.CreateFloat("Y Position Offset", Color.green, 0f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateOffset(ModEnums.OffsetType.Position));
+            ZpOffset = OffsetPage.CreateFloat("Z Position Offset", Color.blue, 0f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateOffset(ModEnums.OffsetType.Position));
+            OffsetPage.CreateFunction(" -------------------- ", Color.white, null).SetProperty(ElementProperties.NoBorder);
+            OffsetPage.CreateFunction("Reset Position", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.PositionOffset));
+            OffsetPage.CreateFunction("Reset Rotation", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.RotationOffset));
             
             //---------------------------------
             
             SmoothingPage = MainPage.CreatePage("Smoothing", Color.white);
-            PSmoothing = SmoothingPage.CreateFloat("Position Smoothing", Color.white, 0f, 1f, float.MinValue, int.MaxValue, _ => SettingsApplier.ApplySmoothing());
-            RSmoothing = SmoothingPage.CreateFloat("Rotation Smoothing", Color.white, 0f, 1f, float.MinValue, int.MaxValue, _ => SettingsApplier.ApplySmoothing());
-            SmoothingPage.Add(new FunctionElement("Reset To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.Smoothing)));
+            PSmoothing = SmoothingPage.CreateFloat("Position Smoothing", Color.white, 0f, 1f, float.MinValue, int.MaxValue, _ => SettingsUpdater.UpdateSmoothing());
+            RSmoothing = SmoothingPage.CreateFloat("Rotation Smoothing", Color.white, 0f, 1f, float.MinValue, int.MaxValue, _ => SettingsUpdater.UpdateSmoothing());
+            SmoothingPage.Add(new FunctionElement("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.Smoothing)));
             
             //---------------------------------
             
             PresetsPage = MainPage.CreatePage("Presets", Color.magenta);
-            var presetNameInput = PresetsPage.CreateString("Preset Name", Color.white, "", null);
-            PresetsPage.CreateFunction("Create Preset From Current Settings", Color.white, () => PresetsManager.CreatePreset(presetNameInput.Value));
-            CreatePresetsPage();
-            Menu.OnPageOpened += page =>
+            var presetInput = PresetsPage.CreateString("Preset Name", Color.white, "", null);
+            PresetsPage.CreateFunction("Create Preset", Color.green, () => PresetsManager.CreatePreset(presetInput.Value));
+            PresetsPage.CreateFunction("Refresh Presets", Color.cyan, PresetsManager.RefreshPresetList);
+            PresetsPage.CreateFunction("Open Presets Folder", Color.yellow, () =>
             {
-                if (page == PresetsPage)
+                Process.Start("explorer.exe", Paths.PresetsPath);
+                
+                Notifier.Send(new Notification
                 {
-                    PresetsManager.RefreshPresetList();
-                }
-            };
+                    Title = "WideEye | Success",
+                    Message = "Opened the presets folder in desktop",
+                    Type = NotificationType.Success,
+                    PopupLength = 2,
+                    ShowTitleOnPopup = true
+                });
+                
+            });
+            PresetsPage.CreateFunction("--------------------", Color.white, null).SetProperty(ElementProperties.NoBorder);
+            CreatePresetsPage();
             
             //---------------------------------
             
             ViewPage = MainPage.CreatePage("View", Color.cyan);
             ViewMode = ViewPage.CreateEnum("View Mode", Color.white, ModEnums.ViewMode.Head, v => CameraController.UpdateView((ModEnums.ViewMode)v));
+            AudioSource = ViewPage.CreateEnum("Audio Source", Color.white, ModEnums.AudioSource.Head, v => CameraController.UpdateAudioSource((ModEnums.AudioSource)v));
             
-            HandheldCameraPage = ViewPage.CreatePage("Handheld Camera", Color.white);
-            if (!ResourcesManager.Loaded)
-            {
-                HandheldCameraPage.Name = "Handheld Camera [ERROR]";
-                HandheldCameraPage.Color = Color.red;
-                HandheldCameraPage.CreateFunction("An Error Occured", Color.white, null);
-                HandheldCameraPage.CreateFunction("While Loading Resources", Color.white, null);
-                HandheldCameraPage.CreateFunction("Check if you have installed the mod correctly", Color.white, null);
-                HandheldCameraPage.CreateFunction("For more help, click me", Color.white, () =>
-                {
-                    Application.OpenURL("https://github.com/HL2H0/WideEye/issues");
-                    var notification = new ModNotification(ModNotification.ModNotificationType.Other, "WideEye | Success", "Opened the GitHub issues page for WideEye On Desktop", NotificationType.Success, 2);
-                    notification.Show();
-                });
-            }
-            else
-            {
-                HandheldCameraPage.CreateFunction("Spawn Camera", Color.green, HandheldCameraManager.SpawnHandheldCamera);
-                HandheldCameraPage.CreateFunction("Destroy Camera", Color.red, HandheldCameraManager.DestroyHandheldCamera);
-                HandheldCameraPage.CreateFunction("Teleport Camera", Color.cyan, HandheldCameraManager.TeleportHandheldCamera);
-            }
+            HandheldCameraPage = ViewPage.CreatePage("Handheld Camera Settings", Color.white);
+            ChangeViewOnSpawn = HandheldCameraPage.CreateBool("Change View On Spawn", Color.yellow, true, v => ModPreferences.ChangeViewOnSpawn = v);
+            
+            HandheldCameraPage.CreateFunction("Spawn Camera [Client Side]", Color.green, HandheldCameraManager.SpawnHandheldCamera);
+            HandheldCameraPage.CreateFunction("Teleport Camera", Color.cyan, HandheldCameraManager.TeleportHandheldCamera);
+            HandheldCameraPage.CreateFunction("Destroy Camera [Client Side]", Color.red, HandheldCameraManager.DestroyHandheldCamera);
+            
             
             FreeCamPage = ViewPage.CreatePage("FreeCam Settings", Color.white);
             FreeCamSpeed = FreeCamPage.CreateFloat("Move Speed", Color.white, 3f, 1, 0, float.MaxValue, v => FreeCamManager.MoveSpeed = v);
@@ -297,44 +319,50 @@ namespace WideEye.UI
             ModSettingsPage = MainPage.CreatePage("Mod Settings", Color.green);
 
             StartupDelay = ModSettingsPage.CreateInt("Startup Delay (Seconds)", Color.cyan, 5, 1, 2, int.MaxValue, v => ModPreferences.StartupDelay = v);
-            AutoSave = ModSettingsPage.CreateBool("Auto Save (Experimental)", Color.yellow, false, v => ModPreferences.AutoSave = v);
-            ModSettingsPage.CreateBool("Head Meshes", Color.yellow, true, value => SettingsApplier.ApplyOther(ModEnums.OtherType.HeadMesh, value));
-            ModSettingsPage.CreateBool("Hair Meshes", Color.yellow, true, value => SettingsApplier.ApplyOther(ModEnums.OtherType.HairMeshes, value));
-            ModSettingsPage.CreateFunction("Reset All To Default", Color.red, () => SettingsApplier.ResetToDefault(ModEnums.ResetType.All));
-            ModSettingsPage.CreateFunction("Load Preferences", Color.green, ModPreferences.LoadPref);
-            ModSettingsPage.CreateFunction("Clear All Preferences", Color.red, ModPreferences.ClearPref);
-            NotificationPage = ModSettingsPage.CreatePage("Notification", Color.magenta);
-            PrefNotifi =
-                NotificationPage.CreateBool("Preferences Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
-            CameraDisabledNotifi = 
-                NotificationPage.CreateBool("Camera Disabled Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
-            CameraFoundNotifi =
-                NotificationPage.CreateBool("Camera Found Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
-            OtherNotifi = 
-                NotificationPage.CreateBool("Other Notifications", Color.white, true, _ => ModNotification.ChangeSilentNotification());
-
+            AutoSave = ModSettingsPage.CreateBool("Auto Save", Color.magenta, false, v => ModPreferences.AutoSave = v);
             
-            SupportPage = MainPage.CreatePage("Support", Color.white);
+            ModSettingsPage.CreateFunction("Reset All To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.All));
+            ModSettingsPage.CreateFunction("Load Preferences", Color.green, ModPreferences.LoadPreferences);
+            ModSettingsPage.CreateFunction("Clear All Preferences", Color.red, ModPreferences.ClearPreferences);
+            ModSettingsPage.CreateFunction("Get Camera", Color.red, () => SpectatorCameraManager.GetSpectatorCamera(false));
+            SupportPage = ModSettingsPage.CreatePage("Support", Color.white);
             SupportPage.CreateFunction("Open GitHub Issues", Color.white, () =>
             {
                 Application.OpenURL("https://github.com/HL2H0/WideEye/issues");
-                var notification = new ModNotification(ModNotification.ModNotificationType.Other, "WideEye | Success", "Opened the GitHub issues page for WideEye On Desktop", NotificationType.Success, 2);
-                notification.Show();
+                Notifier.Send(new Notification
+                {
+                    Title = "WideEye | Success",
+                    Message = "Opened the GitHub issues page for WideEye On Desktop",
+                    Type = NotificationType.Success,
+                    PopupLength = 2,
+                    ShowTitleOnPopup = true
+                });
             });
 
             SupportPage.CreateFunction("Discord", Color.blue, () =>
             {
                 GUIUtility.systemCopyBuffer = "@hiiiiiiiiiiiiiiiiii";
-                var notification = new ModNotification(ModNotification.ModNotificationType.Other, "WideEye | Success", "Copied username to clipboard", NotificationType.Success, 2);
-                notification.Show();
+                Notifier.Send(new Notification
+                {
+                    Title = "WideEye | Success",
+                    Message = "Copied Discord Tag to Clipboard, You can paste it in Discord",
+                    Type = NotificationType.Success,
+                    PopupLength = 2,
+                    ShowTitleOnPopup = true
+                });
             });
 
             SupportPage.CreateFunction("Support me on Ko-Fi", Color.magenta, () =>
             {
                 Application.OpenURL("https://ko-fi.com/hl2h0");
-                var notification = new ModNotification(ModNotification.ModNotificationType.Other, "WideEye | Success",
-                    "Opened the Ko-Fi page for WideEye On Desktop", NotificationType.Success, 2);
-                notification.Show();
+                Notifier.Send(new Notification
+                {
+                    Title = "WideEye | Success",
+                    Message = "Opened Ko-Fi Page On Desktop",
+                    Type = NotificationType.Success,
+                    PopupLength = 2,
+                    ShowTitleOnPopup = true
+                });
             });
 
             SupportPage.CreateFunction($"Version :  {BuildInfo.Version}", Color.white, null);

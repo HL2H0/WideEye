@@ -14,6 +14,7 @@ public class WideEyeSettings
     public SerializableVector3 PosOffset { get; set; }
     public SerializableVector3 RotOffset { get; set; }
     public bool PostFXEnabled { get; set; }
+    public bool MkGlowEnabled { get; set; }
     public bool CaEnabled { get; set; }
     public float CaIntensity { get; set; }
     public bool LdEnabled { get; set; }

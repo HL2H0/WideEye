@@ -1,42 +1,57 @@
 using BoneLib;
+using Il2CppSLZ.Marrow.Pool;
+using MelonLoader;
 using UnityEngine;
 using WideEye.Behaviors;
 using WideEye.Core;
-using WideEye.Data;
 using Object = UnityEngine.Object;
 
 namespace WideEye.CameraManagers;
 
 public static class HandheldCameraManager
 {
-    public static GameObject HandheldCamera;
-    public static HandheldCameraScript ActiveHandheldCameraScript;
+    public static GameObject ActiveHandheldCamera;
+    public static HandheldCamera ActiveScript;
     
-    public static bool Spawned => HandheldCamera;
+    public static bool Found => ActiveHandheldCamera;
     
+    public static void FindHandheldCamera()
+    {
+        if(Found) return;
+        try
+        {
+            ActiveHandheldCamera = GameObject.Find("Handheld Camera [0]");
+            if (ActiveHandheldCamera == null) return;
+            ActiveScript = ActiveHandheldCamera.GetComponent<HandheldCamera>();
+            if (ActiveScript == null) return;
+            ActiveScript.SyncCamera = Mod.ScCameraComponent;
+        }
+        catch(Exception ex)
+        {
+            MelonLogger.Error($"Failed to find Handheld Camera : {ex}");
+        }
+    }
+    
+
     public static void SpawnHandheldCamera()
     {
-        if (Spawned) return;
-        var pos = Player.Head.position + Player.Head.forward * 1f;
-        HandheldCamera = Object.Instantiate(ResourcesManager.HandheldCameraPrefab, pos, Quaternion.identity);
-        HandheldCamera.name = "[WideEye] Handheld Camera";
-        ActiveHandheldCameraScript = HandheldCamera.GetComponent<HandheldCameraScript>();
-        HandheldCamera.transform.position = pos;
-        
+        Transform head = Player.Head;   
+        HelperMethods.SpawnCrate("HL2H0.WideEye.Spawnable.WideEyeHandheldCamera", head.position + head.forward, default, Vector3.one, false, null);
     }
 
     public static void DestroyHandheldCamera()
     {
-        if (!Spawned) return;
-        Object.Destroy(HandheldCamera);
-        HandheldCamera = null;
+        if (!Found) return;
+        AssetSpawner.Despawn(ActiveHandheldCamera.GetComponent<Poolee>());
+        Object.Destroy(ActiveHandheldCamera);
+        ActiveHandheldCamera = null;
         CameraController.UpdateView(ModEnums.ViewMode.Head);
     }
     
     public static void TeleportHandheldCamera()
     { 
-        if(!Spawned) return;
+        if(!Found) return;
         var pos = Player.Head.position + Player.Head.forward * 0.5f;
-        HandheldCamera.transform.position = pos;
+        ActiveHandheldCamera.transform.position = pos;
     }
 }

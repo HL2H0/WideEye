@@ -13,6 +13,7 @@ namespace WideEye.Data
     {
         public static bool AutoSave;
         public static int StartupDelay { get => _startupDelay.Value; set => _startupDelay.Value = value; }
+        public static bool ChangeViewOnSpawn { get => _changeViewOnSpawn.Value; set => _changeViewOnSpawn.Value = value; }
         
         private static MelonPreferences_Category _categWideEye;
         private static MelonPreferences_Entry<float> _fov;
@@ -21,12 +22,12 @@ namespace WideEye.Data
         private static MelonPreferences_Entry<Vector3> _positionOffset;
         private static MelonPreferences_Entry<float> _rotationSmoothing;
         private static MelonPreferences_Entry<float> _positionSmoothing;
-        private static MelonPreferences_Entry<bool> _showOtherNotifi;
-        private static MelonPreferences_Entry<bool> _showPrefNotifi;
-        private static MelonPreferences_Entry<bool> _showCameraDisabledNotifi;
-        private static MelonPreferences_Entry<bool> _showCameraFoundNotifi;
+        
         private static MelonPreferences_Entry<bool> _autoSave;
         private static MelonPreferences_Entry<int> _startupDelay;
+        private static MelonPreferences_Entry<bool> _changeViewOnSpawn;
+        private static MelonPreferences_Entry<bool> _handheldAudioSource;
+        
         private static MelonPreferences_Entry<float> _freeCamSpeed;
         private static MelonPreferences_Entry<float> _freeCamFastSpeed;
         private static MelonPreferences_Entry<float> _freeCamSensitivity;
@@ -34,6 +35,9 @@ namespace WideEye.Data
         private static MelonPreferences_Entry<float> _freeCamScrollSensitivity;
         private static MelonPreferences_Entry<float> _freeCamScrollSmoothing;
         private static MelonPreferences_Entry<bool> _freecamIndicator;
+
+        private static MelonPreferences_Category _categPfxMk;
+        private static MelonPreferences_Entry<bool> _mkEnabled;
         
         
         private static MelonPreferences_Category _categPfxLd;
@@ -59,7 +63,7 @@ namespace WideEye.Data
         private static MelonPreferences_Entry<AutoExposureMeteringMaskMode> _aeMeteringMask;
         private static MelonPreferences_Entry<float> _aeMetProcedFalloff;
         
-        public static void CreatePref()
+        public static void CreatePreferences()
         {
             _categWideEye = MelonPreferences.CreateCategory("WideEye");
             _fov = _categWideEye.CreateEntry("Fov", 75f);
@@ -69,10 +73,6 @@ namespace WideEye.Data
             _rotationSmoothing = _categWideEye.CreateEntry("RotationSmoothing", 0f);
             _positionSmoothing = _categWideEye.CreateEntry("PositionSmoothing", 0f);
             _startupDelay = _categWideEye.CreateEntry("StartupDelay", 5);
-            _showOtherNotifi = _categWideEye.CreateEntry("ShowOtherNotification", true);
-            _showPrefNotifi = _categWideEye.CreateEntry("ShowPrefNotification", true);
-            _showCameraDisabledNotifi = _categWideEye.CreateEntry("ShowCameraDisabledNotification", true);
-            _showCameraFoundNotifi = _categWideEye.CreateEntry("ShowCameraFoundNotification", true);
             _autoSave = _categWideEye.CreateEntry("AutoSave", false);
             _freeCamSpeed = _categWideEye.CreateEntry("FreeCamSpeed", 3f);
             _freeCamFastSpeed = _categWideEye.CreateEntry("FreeCamFastSpeed", 7f);
@@ -81,6 +81,11 @@ namespace WideEye.Data
             _freeCamScrollSensitivity = _categWideEye.CreateEntry("FreeCamScrollSensitivity", 15f);
             _freeCamScrollSmoothing = _categWideEye.CreateEntry("FreeCamScrollSmoothing", 10f);
             _freecamIndicator = _categWideEye.CreateEntry("FreeCamIndicator", true);
+            _changeViewOnSpawn = _categWideEye.CreateEntry("ChangeViewOnSpawn", true);
+            _handheldAudioSource = _categWideEye.CreateEntry("Handheld AudioSource", true);
+            
+            _categPfxMk = MelonPreferences.CreateCategory("WideEye_PostFX_MKGlow");
+            _mkEnabled = _categPfxMk.CreateEntry("Enabled", true);
             
             _categPfxLd = MelonPreferences.CreateCategory("WideEye_PostFX_LensDistortion");
             _ldEnabled = _categPfxLd.CreateEntry("Enabled", true);
@@ -106,20 +111,17 @@ namespace WideEye.Data
             _aeMetProcedFalloff = _categPfxAe.CreateEntry("MeteringProceduralFalloff", 2f);
         }
 
-        public static void LoadPref()
+        public static void LoadPreferences()
         {
-            SettingsApplier.ApplyFOV(_fov.Value, true, ModMenu.FOVSlider);
-            SettingsApplier.ApplyOther(ModEnums.OtherType.PostFX, _postFX.Value, true);
+            SettingsUpdater.UpdateFOV(_fov.Value, true, ModMenu.FOVSlider);
+            SettingsUpdater.TogglePostFX(_postFX.Value, true);
             ModMenu.PostFXToggle.Value = _postFX.Value;
-            SettingsApplier.ApplyOffset(_rotationOffset.Value, ModEnums.OffsetType.Rotation, true, ModMenu.XrOffset, ModMenu.YrOffset, ModMenu.ZrOffset);
-            SettingsApplier.ApplyOffset(_positionOffset.Value, ModEnums.OffsetType.Position, true, ModMenu.XpOffset, ModMenu.YpOffset, ModMenu.ZpOffset);
-            SettingsApplier.ApplySmoothing(_rotationSmoothing.Value, _positionSmoothing.Value, true);
+            SettingsUpdater.UpdateOffset(_rotationOffset.Value, ModEnums.OffsetType.Rotation, true);
+            SettingsUpdater.UpdateOffset(_positionOffset.Value, ModEnums.OffsetType.Position, true);
+            SettingsUpdater.UpdateSmoothing(_rotationSmoothing.Value, _positionSmoothing.Value, true);
             
-            ModMenu.StartupDelay.Value = _startupDelay.Value;
             
-            ModNotification.ChangeSilentNotification(_showOtherNotifi.Value, _showPrefNotifi.Value,
-                _showCameraDisabledNotifi.Value, _showCameraFoundNotifi.Value, ModMenu.OtherNotifi,
-                ModMenu.PrefNotifi, ModMenu.CameraDisabledNotifi, ModMenu.CameraFoundNotifi);
+            ModMenu.ChangeViewOnSpawn.Value = _changeViewOnSpawn.Value;
             
             ModMenu.AutoSave.Value = _autoSave.Value;
             AutoSave = _autoSave.Value;
@@ -131,14 +133,22 @@ namespace WideEye.Data
             FreeCamManager.ScrollSensitivity = _freeCamScrollSensitivity.Value;
             FreeCamManager.ScrollSmoothing = _freeCamScrollSmoothing.Value;
             FreeCamManager.ShowIndicator = _freecamIndicator.Value;
+
+            SettingsUpdater.UpdateMkGlow(_mkEnabled.Value, true);
             
-            SettingsApplier.ApplyLd(_ldEnabled.Value, _ldCenter.Value, _ldIntensity.Value, _ldScale.Value, _ldXMultiplier.Value, _ldYMultiplier.Value, true);
-            SettingsApplier.ApplyCa(_caEnabled.Value, _caIntensity.Value, true);
-            SettingsApplier.ApplyAe(_aeEnabled.Value, _aeAdaptationMode.Value, _aeD2Ls.Value, _aeEvCompensation.Value, _aeEvMax.Value, _aeEvMin.Value, _aeL2Ds.Value, _aeMeteringMask.Value, _aeMetProcedFalloff.Value, true);
+            SettingsUpdater.UpdateLensDistortion(_ldEnabled.Value, _ldCenter.Value, _ldIntensity.Value, _ldScale.Value,
+                _ldXMultiplier.Value, _ldYMultiplier.Value, true);
+            
+            SettingsUpdater.UpdateChromaticAberration(_caEnabled.Value, _caIntensity.Value, true);
+            
+            SettingsUpdater.UpdateAutoExposure(_aeEnabled.Value, _aeAdaptationMode.Value, _aeD2Ls.Value,
+                _aeEvCompensation.Value, _aeEvMax.Value, _aeEvMin.Value, _aeL2Ds.Value, _aeMeteringMask.Value,
+                _aeMetProcedFalloff.Value, true);
+            
             MelonLogger.Msg(ConsoleColor.Green, "Loaded Preferences.");
         }
 
-        public static void SavePref()
+        public static void SavePreferences()
         {
             _fov.Value = ModMenu.FOVSlider.Value;
             _postFX.Value = ModMenu.PostFXToggle.Value;
@@ -147,11 +157,10 @@ namespace WideEye.Data
             _rotationSmoothing.Value = ModMenu.RSmoothing.Value;
             _positionSmoothing.Value = ModMenu.PSmoothing.Value;
 
-            _showOtherNotifi.Value = ModMenu.OtherNotifi.Value;
-            _showPrefNotifi.Value = ModMenu.PrefNotifi.Value;
-            _showCameraDisabledNotifi.Value = ModMenu.CameraDisabledNotifi.Value;
-            _showCameraFoundNotifi.Value = ModMenu.CameraFoundNotifi.Value;
-
+            _startupDelay.Value = ModMenu.StartupDelay.Value;
+            
+            _changeViewOnSpawn.Value = ModMenu.ChangeViewOnSpawn.Value;
+            
             _autoSave.Value = ModMenu.AutoSave.Value;
             
             _freeCamSpeed.Value = ModMenu.FreeCamSpeed.Value;
@@ -161,6 +170,7 @@ namespace WideEye.Data
             _freeCamScrollSensitivity.Value = ModMenu.FreeCamScrollSensitivity.Value;
             _freeCamScrollSmoothing.Value = ModMenu.FreeCamScrollSmoothing.Value;
             
+            _mkEnabled.Value = ModMenu.MkGlowEnabled.Value;
             
             _ldEnabled.Value = ModMenu.LdEnabled.Value;
             _ldCenter.Value = new Vector2(ModMenu.LdCenterX.Value, ModMenu.LdCenterY.Value);
@@ -189,29 +199,43 @@ namespace WideEye.Data
 
             if (AutoSave) return;
             
-            var notification = new ModNotification(ModNotification.ModNotificationType.Preferences, "WideEye | Success", "Saved Preferences.", NotificationType.Success, 2);
-            notification.Show();
+            Notifier.Send(new Notification
+            {
+                Title = "WideEye | Success",
+                Message = "Saved Preferences",
+                Type = NotificationType.Success,
+                PopupLength = 2,
+                ShowTitleOnPopup = true
+            });
             MelonLogger.Msg(ConsoleColor.Green, "Saved Preferences.");
         }
         
         
-        public static void ClearPref()
+        public static void ClearPreferences()
         {
             var categ = _categWideEye.Entries
             .Concat(_categPfxLd.Entries)
             .Concat(_categPfxCa.Entries)
             .Concat(_categPfxAe.Entries)
+            .Concat(_categPfxMk.Entries)
             .ToList();
 
             foreach (var entry in categ)
             {
                 entry.ResetToDefault();
             }
-            LoadPref();
-            var notification = new ModNotification(ModNotification.ModNotificationType.Preferences, "WideEye | Success", "Cleared All Preferences", NotificationType.Success, 2);
-            notification.Show();
+            
+            LoadPreferences();
+            
+            Notifier.Send(new Notification
+            {
+                Title = "WideEye | Success",
+                Message = "Cleared All Preferences",
+                Type = NotificationType.Success,
+                PopupLength = 2,
+                ShowTitleOnPopup = true
+            });
             MelonLogger.Msg(ConsoleColor.Green, "Done!, Cleared All Preferences");
         }
-
     }
 }

@@ -10,36 +10,70 @@
 - **Preferences Saving**
 - **Auto-Apply & Auto-Save**
 - **Offset Adjustments**
-    - Position
-    - Rotation
+  - Position
+  - Rotation
 - **Smoothing** _(Stabilization)_
-    - Position
-    - Rotation
+  - Position
+  - Rotation
 - **Avatar Mesh Toggle**
-    - Hair Meshes
-    - Head Meshes
+  - Head Offset
+  - Hair Meshes
+  - Head Meshes
 - **Post-Processing Adjustments**
-    - Auto Exposure
-    - Chromatic Aberration
-    - Lens Distortion
+  - Auto Exposure
+  - Chromatic Aberration
+  - Lens Distortion
+  - MkGlow
 - **View Modes**
-    - Handheld Camera
-    - Free Camera
+  - Head _(First Person)_
+  - Handheld Camera
+  - Free Camera
 - **Presets System**
-    - Save/Load settings
-    - JSON file sharing
+  - Save/Load settings
+  - JSON file sharing
 
 ---  
+## 📦 Installation
+
+1. Download the latest release from [**Thunderstore**](https://thunderstore.io/c/bonelab/p/HL2H0/WideEye/).
+2. Extract the contents of the ZIP.
+3. Copy the included `Mods` folder into your BONELAB **root directory**.
+  - Typically found at: `C:\Program Files (x86)\Steam\steamapps\common\BONELAB\`
+  - or `C:\Program Files\Oculus\Software\Software\BONELAB\`
+4. Download the handheld camera mod from [Mod.io](https://mod.io/g/bonelab/m/wideeye-handheld-camera)
+
+
+
+Then you are ready to go!  
+Enjoy WideEye!
+
+> Note for Updaters :
+You can now safely remove the `md_resources.bundle` file from `UserData\WideEye Resources\`
+as now the resources are embedded into the file
+---  
+
+## 🛠 Requirements
+
+- PC
+- BONELAB Patch 5/6
+- MelonLoader 0.6
+- [BoneLib 3.1.1](https://thunderstore.io/c/bonelab/p/gnonme/BoneLib/)
+- [FieldInjector 2.1.1](https://thunderstore.io/c/bonelab/p/WNP78/FieldInjector/)
+
+---
 
 ## Controls
 
 ### Handheld Camera
-| Control                    | Action                        |  
-|----------------------------|-------------------------------|  
-| Right Handle - Menu Button | Pin camera in place           |  
-| Right Handle - Trigger     | Zoom in                       |  
-| Left Handle - Menu Button  | Toggle preview screen         |  
-| Left Handle - Trigger      | Zoom out                      |
+| Button                       | Action                   | 
+|------------------------------|--------------------------|  
+| Right Handle - Menu Button   | Pin camera in place      |  
+| Right Handle - Trigger       | Zoom in                  |  
+| Left Handle - Menu Button    | Toggle preview screen    |  
+| Left Handle - Trigger        | Zoom out                 |
+| Ring - Trigger               | Toggle Bult-in Spotlight |
+| Ring - Menu Button           | Toggle Spotlight Color   |
+| Preview Screen - Menu Button | Flip Screen for Selfies  |
 
 ### Free Camera
 | Key                       | Action                  |
@@ -50,6 +84,7 @@
 | Shift(Hold)               | Move Faster             |
 | Left Mouse Button (Hold)  | Rotate/Move camera      |
 | LMB + Scroll Wheel        | Zoom in/out             |
+
 ---  
 
 
@@ -60,39 +95,20 @@ Sharing your camera presets is easy—here’s how:
 ### Exporting
 
 1. Open the **Presets** page and click **View Path**.
-
 2. Your preset file (`.json`) will be highlighted in the file explorer.
-
 3. Copy that file and send it to a friend.
 
-
-> As they say: _sharing is caring_.
 
 ### Importing
 
 1. Have your friend send you their `.json` preset file.
+2. Open the **Presets** page and click **View Folder**.
+3. Paste the `.json` file into the folder.
+4. Click **Refresh** in the Presets menu to see the new preset.
 
-2. Paste the file into this folder: `[GameRootDir]\UserData\WideEye Resources\Presets`
-    - the `[GameRootDir]` For Steam is  : `C:\Program Files (x86)\Steam\steamapps\common\BONELAB`
-    - For Meta Link : `C:\Program Files\Oculus\Software\Software\BONELAB`
-3. Reopen the **Presets** page and you should see the imported preset.
-
+> As they say: _sharing is caring_.
 ---  
 
-## 📦 Installation
-> **Note:** Mod Managers may not download WideEye correctly. Manual installation is recommended.
-
-1. Download the latest release from [**Thunderstore**](https://thunderstore.io/c/bonelab/p/HL2H0/WideEye/).
-2. Extract the contents of the ZIP.
-3. Copy the included `Mods` and `UserData` folders into your BONELAB **root directory**.
-    - Typically found at: `C:\Program Files (x86)\Steam\steamapps\common\BONELAB\`
-    - or `C:\Program Files\Oculus\Software\Software\BONELAB\`
-   > Make sure you have copied the `UserData` folder and the `md_resource.bundle` inside it, as it contains essential resources for WideEye to function properly.
-
-Then you are ready to go!  
-Enjoy WideEye!
-  
----  
 
 ## 💬 GitHub Discussions
 
@@ -108,18 +124,8 @@ WideEye now has a dedicated [Discussions](https://github.com/HL2H0/WideEye/discu
 -   🎥 **Show and Tell** — Post your screenshots, videos, or creative setups using WideEye!
 
 
-Join the conversation here:  
+Join the conversation here:
 👉 [github.com/HL2H0/WideEye/discussions](https://github.com/HL2H0/WideEye/discussions)
-
----
-
-## 🛠 Requirements
-
-- PC
-- BONELAB Patch 5/6
-- MelonLoader 0.6
-- [BoneLib 3.1.1](https://thunderstore.io/c/bonelab/p/gnonme/BoneLib/)
-- [FieldInjector 2.1.1](https://thunderstore.io/c/bonelab/p/WNP78/FieldInjector/)
 
 ---  
 
@@ -134,8 +140,9 @@ So I thought, “Screw it, I’ll just make a simple mod that changes the FOV wh
 I removed the space, launched the game, pressed “F,” and boom—it worked.
 
 I was so hyped I made a GitHub repo, a quick icon, a menu, and even a README all in one night. And just like that, WideEye was born.
-  
+
 ---  
+
 ## 💖 Support
 
 WideEye started as a random “what if?” moment—and now it’s an actual tool people use, which is wild.
@@ -175,37 +182,40 @@ WideEye is open-source and welcomes suggestions, bug reports, and contributions!
 
 ---  
 
-## 💡 Future Plans
-
-- MKGlow support
-- Custom UI
-
----  
-
 ## 📜ChangeLog
-
-### Latest Release 3.1.0
+****
+### Latest Release 4.0.0
 
 #### Added
-* Free Camera Mode
-* Added a startup delay slider [Changing it below 2 seconds is not recommended]
+* Timeline compatibility
+* MkGlow (Partly)
+* Audio Sources
+* Handheld Camera
+  * Removed grip limit on the handles
+  * Syncs with fusion
+  * Moved to a separate SDK mod
+  * Changed built-in spotlight colors to warm, neutral, and cold
+* BoneMenu
+  * Presets values view
+  * Open Preset Folder button
+  * Delete Preset button
+  * Avatar Mesh Page
+  * Refresh Presets button
+* Head Meshes Offset Toggle
 
 #### Changed
-* Some code improvements
-* UI Layout
-    * Moved the Support Page to the bottom of the main menu
-* Removed some unnecessary notifications
-    * Replaced all the notifications with a single one that shows when everything is loaded properly.
-
+* Decreased built-in spotlight intensity increment to 0.5
+* Removed the grip limit for the handheld camera
+* Now `UserData` folder is not required
+* Moved `md_resources.bundle` to an embedded resource for better installation
+* Some code refactoring
 
 #### Fixed
-* Fixed Ko-fi Button in the README file
-* Fixed `ViewPath` not opening the file explorer properly. (Again lol)
-* Removed leftover logging
-* Version number not being right
+* Handheld camera zoom not working
+* Loading Presets with a post-processing effect not applying correctly
+* Loading Presets doesn't update the menu
+* Saving presets wrongly
 
-#### Known Issues
-* After zooming with the free cam and stopping quickly, the FOV may display as a long decimal value
 ---
 
 visit the [**Releases**](https://github.com/HL2H0/WideEye/releases) page for previous changelogs.

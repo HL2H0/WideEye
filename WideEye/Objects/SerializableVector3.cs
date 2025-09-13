@@ -26,4 +26,9 @@ public class SerializableVector3
     {
         return new Vector3(X, Y, Z);
     }
+    
+    public override string ToString()
+    {
+        return $"X : {X}\nY : {Y}\nZ : {Z}";
+    }
 }

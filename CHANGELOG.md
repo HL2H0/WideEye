@@ -1,5 +1,37 @@
 ﻿# WideEye ChangeLog
 
+## [4.0.0] **Major Update**
+
+### Added
+* Timeline compatibility
+* MkGlow (Partly)
+* Audio Sources
+* Handheld Camera
+	* Removed grip limit on the handles
+	* Syncs with fusion
+	* Moved to a separate SDK mod
+	* Changed built-in spotlight colors to warm, neutral, and cold
+* BoneMenu
+	* Presets values view
+	* Open Preset Folder button
+	* Delete Preset button
+	* Avatar Mesh Page
+	* Refresh Presets button
+* Head Meshes Offset Toggle
+
+### Changed
+* Decreased built-in spotlight intensity increment to 0.5
+* Removed the grip limit for the handheld camera
+* Now `UserData` folder is not required
+* Moved `md_resources.bundle` to an embedded resource for better installation
+* Some code refactoring
+
+### Fixed
+* Handheld camera zoom not working
+* Loading Presets with a post-processing effect not applying correctly
+* Loading Presets doesn't update the menu
+* Saving presets wrongly
+
 ## [3.1.0] **Regular Update**
 ### Added
 * Free Camera Mode

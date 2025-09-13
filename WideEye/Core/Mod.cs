@@ -7,6 +7,7 @@ using Il2CppSLZ.Marrow;
 using MelonLoader;
 using BoneLib;
 using BoneLib.Notifications;
+using Il2CppMK.Glow.URP;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -28,7 +29,7 @@ namespace WideEye.Core
     {
         //Needed GameObjects and Components
 
-        public static PlayerAvatarArt RmPlayerArtComponent;
+        public static PlayerAvatarArt PlayerArtComponent;
         public static GameObject ScGameObject;
         public static GameObject StGameObject;
         public static Camera ScCameraComponent;
@@ -38,6 +39,7 @@ namespace WideEye.Core
         
 
         //Post-FX Overrides
+        public static MKGlow MKGlowOverride;
         public static LensDistortion LensDistortionOverride;
         public static ChromaticAberration ChromaticAberrationOverride;
         public static AutoExposure AutoExposureOverride;
@@ -46,12 +48,11 @@ namespace WideEye.Core
         public static bool FoundCamera;
 
         //MelonLoader & BoneLib Events
-
         public override void OnInitializeMelon()
         {
             Paths.InitFolders();
             ResourcesManager.Init();
-            ModPreferences.CreatePref();
+            ModPreferences.CreatePreferences();
             PresetsManager.LoadPresets();
             ModMenu.SetupBoneMenu();
             Hooking.OnLevelUnloaded += BoneLib_OnLevelUnloaded;
@@ -70,30 +71,34 @@ namespace WideEye.Core
             yield return new WaitForSeconds(waitTime);
             
             SpectatorCameraManager.GetSpectatorCamera(true);
-            
             FreeCamManager.Init();
-            ModPreferences.LoadPref();
-            if (!ResourcesManager.Loaded)
+            ModPreferences.LoadPreferences();
+            ResourcesManager.CheckPallet();
+
+            TimelineHelper.StartHelper();
+            
+            if (!ResourcesManager.Loaded || !ResourcesManager.PalletInstalled) yield break;
+            
+            Notifier.Send(new Notification
             {
-                var notification = new ModNotification(ModNotification.ModNotificationType.Force, "Error",
-                    "Mod resources isn't loaded correctly or couldn't be found.", NotificationType.Error, 5);
-                notification.Show();
-                MelonLogger.Error("Mod resources isn't loaded correctly or couldn't be found.");
-            }
-            else
-            {
-                var notification = new ModNotification(ModNotification.ModNotificationType.CameraFound, "Success",
-                    "WideEye Has Launched Without errors (=", NotificationType.Success, 2);
-                notification.Show();
-            }
+                Title = "WideEye | Success",
+                Message = "WideEye Has Launched Without errors (=",
+                Type = NotificationType.Success,
+                PopupLength = 2,
+                ShowTitleOnPopup = true
+            });
         }
 
         private void BoneLib_OnLevelUnloaded()
         {
             FoundCamera = false;
-            if (!HandheldCameraManager.Spawned) return;
-            GameObject.Destroy(HandheldCameraManager.HandheldCamera);
-            HandheldCameraManager.HandheldCamera = null;
+            if (TimelineHelper.UsingTimeline)
+            {
+                TimelineHelper.UsingTimeline = false;
+            }
+            if (!HandheldCameraManager.Found) return;
+            HandheldCameraManager.ActiveHandheldCamera = null;
+            ModMenu.AudioSource.Value = ModEnums.AudioSource.Head;
             ModMenu.ViewMode.Value = ModEnums.ViewMode.Head;
         }
     }

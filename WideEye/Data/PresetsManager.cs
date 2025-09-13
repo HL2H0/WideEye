@@ -23,16 +23,28 @@ namespace WideEye.Data
             var presets = Directory.GetFiles(Paths.PresetsPath, "*.json");
             foreach (var preset in presets)
             {
-                var presetClass = JsonSerializer.Deserialize<WideEyeSettings>(File.ReadAllText(preset));
-                if (presetClass != null)
+                try
                 {
-                    Presets.Add(presetClass.Name, presetClass);
-                    MelonLogger.Msg($"Loaded Preset: {presetClass.Name}");
+                    var presetClass = JsonSerializer.Deserialize<WideEyeSettings>(File.ReadAllText(preset));
+                    if (presetClass != null)
+                    {
+                        Presets.Add(presetClass.Name, presetClass);
+                        if (presetClass.Version != BuildInfo.Version)
+                        {
+                            presetClass.MkGlowEnabled = true;
+                        }
+                        MelonLogger.Msg($"Loaded Preset: {presetClass.Name}");
+                    }
+                    else
+                    {
+                        MelonLogger.Error($"Preset {preset} Couldn't be Loaded");
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    MelonLogger.Error($"Preset {preset} Couldn't be Loaded");
+                    MelonLogger.Error($"Preset \"{preset}\" Is Corrupted\nError Message {e.Message}\n");
                 }
+
             }
         }
 
@@ -41,18 +53,22 @@ namespace WideEye.Data
             var preset = Presets[presetName];
             if (preset != null)
             {
-                SettingsApplier.ApplyFOV(preset.FOV, true);
-                SettingsApplier.ApplySmoothing(preset.RotSmoothing, preset.PosSmoothing, true);
-                SettingsApplier.ApplyOffset(preset.RotOffset.ToVector3(), ModEnums.OffsetType.Rotation);
-                SettingsApplier.ApplyOffset(preset.PosOffset.ToVector3(), ModEnums.OffsetType.Position);
+                SettingsUpdater.UpdateFOV(preset.FOV, true);
+                SettingsUpdater.UpdateSmoothing(preset.RotSmoothing, preset.PosSmoothing, true);
+                SettingsUpdater.UpdateOffset(preset.RotOffset.ToVector3(), ModEnums.OffsetType.Rotation);
+                SettingsUpdater.UpdateOffset(preset.PosOffset.ToVector3(), ModEnums.OffsetType.Position);
                 
-                SettingsApplier.ApplyCa(preset.CaEnabled, preset.CaIntensity, true);
+                SettingsUpdater.TogglePostFX(preset.PostFXEnabled, true);
                 
-                SettingsApplier.ApplyAe(preset.AeEnabled, preset.AeAdaptationMode, preset.AeD2Ls, preset.AeEvComp,
+                SettingsUpdater.UpdateMkGlow(preset.MkGlowEnabled, true);
+                
+                SettingsUpdater.UpdateChromaticAberration(preset.CaEnabled, preset.CaIntensity, true);
+                
+                SettingsUpdater.UpdateAutoExposure(preset.AeEnabled, preset.AeAdaptationMode, preset.AeD2Ls, preset.AeEvComp,
                     preset.AeEvMax, preset.AeEvMin, preset.AeL2ds, preset.AeMeetringMaskMode,
                     preset.AeMeetaeMeteringProceduralFalloff, true);
 
-                SettingsApplier.ApplyLd(preset.LdEnabled, preset.LdCenter.ToVector2(), preset.LdIntensity, preset.LdScale,
+                SettingsUpdater.UpdateLensDistortion(preset.LdEnabled, preset.LdCenter.ToVector2(), preset.LdIntensity, preset.LdScale,
                     preset.LdMultiplyer.X, preset.LdMultiplyer.Y, true);
                 
                 MelonLogger.Msg($"Applied Preset: {presetName}");
@@ -77,18 +93,22 @@ namespace WideEye.Data
         public static void RefreshPresetList()
         {
             var presets = Directory.GetFiles(Paths.PresetsPath, "*.json");
-            foreach (var preset in presets)
+            var presetNames = presets.Select(Path.GetFileNameWithoutExtension).ToList();
+            foreach(var presetName in presetNames)
             {
-                if (Presets.ContainsKey(Path.GetFileNameWithoutExtension(preset))) return;
-                var presetClass = JsonSerializer.Deserialize<WideEyeSettings>(File.ReadAllText(preset));
-                if (presetClass != null)
+                if (!Presets.ContainsKey(presetName))
                 {
-                    Presets.Add(presetClass.Name, presetClass);
-                    MelonLogger.Msg($"Loaded Preset: {presetClass.Name}");
-                }
-                else
-                {
-                    MelonLogger.Error($"Preset {preset} Couldn't be Loaded");
+                    var presetClass = JsonSerializer.Deserialize<WideEyeSettings>(File.ReadAllText(Path.Combine(Paths.PresetsPath, $"{presetName}.json")));
+                    if (presetClass != null)
+                    {
+                        Presets.Add(presetName, presetClass);
+                        MelonLogger.Msg($"Loaded Preset: {presetName}");
+                        ModMenu.CreateOnePresetPage(presetName);
+                    }
+                    else
+                    {
+                        MelonLogger.Error($"Preset {presetName} Couldn't be Loaded");
+                    }
                 }
             }
         }
@@ -116,6 +136,18 @@ namespace WideEye.Data
             ModMenu.CreateOnePresetPage(presetName);
             
             MelonLogger.Msg($"Created Preset: {presetName}");
+        }
+        
+        public static void DeletePreset(string presetName)
+        {
+            if (Presets.ContainsKey(presetName))
+            {
+                Presets.Remove(presetName);
+                var path = Path.Combine(Paths.PresetsPath, $"{presetName}.json");
+                if (File.Exists(path)) File.Delete(path);
+                
+                MelonLogger.Msg($"Deleted Preset: {presetName}");
+            }
         }
     }
 }

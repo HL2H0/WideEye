@@ -1,4 +1,5 @@
 using BoneLib;
+using MelonLoader;
 using UnityEngine;
 using WideEye.UI;
 using WideEye.Utilities;
@@ -76,7 +77,7 @@ namespace WideEye.Behaviors
             _currentScrollValue = Mathf.Lerp(_currentScrollValue, _targetScrollValue, scrollSmoothing * Time.deltaTime);
             
             transform.position = Vector3.Lerp(transform.position, _targetPosition, smoothSpeed * Time.deltaTime);
-            SettingsApplier.ApplyFOV(_currentScrollValue, true, ModMenu.FOVSlider);
+            SettingsUpdater.UpdateFOV(_currentScrollValue, true, ModMenu.FOVSlider);
             
             _targetPosition += moveDirection.normalized * (speed * Time.deltaTime);
             
@@ -84,7 +85,7 @@ namespace WideEye.Behaviors
             {
                 var rotationX = transform.localEulerAngles.y + Input.GetAxis("Mouse X") * sensitivity;
                 var rotationY = transform.localEulerAngles.x - Input.GetAxis("Mouse Y") * sensitivity;
-
+                
                 transform.localEulerAngles = new Vector3(rotationY, rotationX, 0f);
             }
         }

@@ -1,5 +1,6 @@
 ﻿using BoneLib;
 using BoneLib.BoneMenu;
+using Il2CppMK.Glow;
 using Il2CppOccaSoftware.Exposure.Runtime;
 using UnityEngine;
 using WideEye.Core;
@@ -8,49 +9,53 @@ using WideEye.UI;
 
 namespace WideEye.Utilities
 {
-    public static class SettingsApplier
+    public static class SettingsUpdater
     {
         public static void ResetToDefault(ModEnums.ResetType resetType)
         {
             switch (resetType)
             {
                 case ModEnums.ResetType.Fov:
-                    ApplyFOV(75f, true, ModMenu.FOVSlider);
+                    UpdateFOV(75f, true, ModMenu.FOVSlider);
                     break;
 
                 case ModEnums.ResetType.Smoothing:
-                    ApplySmoothing(0f, 0f, true);
+                    UpdateSmoothing(0f, 0f, true);
                     break;
 
                 case ModEnums.ResetType.RotationOffset:
-                    ApplyOffset(new(11f, 0f, 0f), ModEnums.OffsetType.Rotation, true, ModMenu.XrOffset, ModMenu.YrOffset, ModMenu.ZrOffset);
+                    UpdateOffset(new(11f, 0f, 0f), ModEnums.OffsetType.Rotation, true);
                     break;
 
                 case ModEnums.ResetType.PositionOffset:
-                    ApplyOffset(new(0f, 0f, 0f), ModEnums.OffsetType.Position, true, ModMenu.XpOffset, ModMenu.YpOffset, ModMenu.ZpOffset);
+                    UpdateOffset(new(0f, 0f, 0f), ModEnums.OffsetType.Position, true);
+                    break;
+                
+                case ModEnums.ResetType.MKGlow:
+                    UpdateMkGlow(true, true);
                     break;
 
                 case ModEnums.ResetType.LensDistortion:
-                    ApplyLd(true, new Vector2(0.5f, 0.5f), 0.48f, 1f, 0.59f, 1f, true);
+                    UpdateLensDistortion(true, new Vector2(0.5f, 0.5f), 0.48f, 1f, 0.59f, 1f, true);
                     break;
 
                 case ModEnums.ResetType.ChromaticAberration:
-                    ApplyCa(true, 0.123f, true);
+                    UpdateChromaticAberration(true, 0.123f, true);
                     break;
 
                 case ModEnums.ResetType.AutoExposure:
-                    ApplyAe(true, AutoExposureAdaptationMode.Progressive, 3f, 2.5f, 1.2f, -1.2f, 1f,
+                    UpdateAutoExposure(true, AutoExposureAdaptationMode.Progressive, 3f, 2.5f, 1.2f, -1.2f, 1f,
                         AutoExposureMeteringMaskMode.Procedural, 2f, true);
                     break;
 
                 case ModEnums.ResetType.All:
-                    ApplyFOV(75f, true, ModMenu.FOVSlider);
-                    ApplySmoothing(0f, 0f, true);
-                    ApplyOffset(new(11f, 0, 0), ModEnums.OffsetType.Rotation, true, ModMenu.XrOffset, ModMenu.YrOffset, ModMenu.ZrOffset);
-                    ApplyOffset(new(0f, 0f, 0f), ModEnums.OffsetType.Position, true, ModMenu.XpOffset, ModMenu.YpOffset, ModMenu.ZpOffset);
-                    ApplyLd(true, new Vector2(0.5f, 0.5f), 0.48f, 1f, 0.59f, 1f, true);
-                    ApplyCa(true, 0.123f, true);
-                    ApplyAe(true, AutoExposureAdaptationMode.Progressive, 3f, 2.5f, 1.2f, -1.2f, 1, 
+                    UpdateFOV(75f, true, ModMenu.FOVSlider);
+                    UpdateSmoothing(0f, 0f, true);
+                    UpdateOffset(new(11f, 0, 0), ModEnums.OffsetType.Rotation, true);
+                    UpdateOffset(new(0f, 0f, 0f), ModEnums.OffsetType.Position, true);
+                    UpdateLensDistortion(true, new Vector2(0.5f, 0.5f), 0.48f, 1f, 0.59f, 1f, true);
+                    UpdateChromaticAberration(true, 0.123f, true);
+                    UpdateAutoExposure(true, AutoExposureAdaptationMode.Progressive, 3f, 2.5f, 1.2f, -1.2f, 1, 
                         AutoExposureMeteringMaskMode.Procedural, 2f, true);
                     Mod.ScVolumeComponent.enabled = true;
                     ModMenu.PostFXToggle.Value = true;
@@ -58,66 +63,87 @@ namespace WideEye.Utilities
             }
 
         }
+
+        public static void UpdateAllSettings()
+        {
+            UpdateFOV(ModMenu.FOVSlider.Value);
+            UpdateOffset(ModEnums.OffsetType.Position);
+            UpdateOffset(ModEnums.OffsetType.Rotation);
+            TogglePostFX(true);
+            UpdateChromaticAberration();
+            UpdateAutoExposure();
+            UpdateLensDistortion();
+            UpdateMkGlow();
+            UpdateSmoothing();
+        }
         
 
-        public static void ApplyFOV(float fov, bool syncElementValue = false, FloatElement fovEle = null)
+        public static void UpdateFOV(float fov, bool syncElementValue = false, FloatElement fovEle = null)
         {
             Mod.ScCameraComponent.fieldOfView = fov;
-            if (ModPreferences.AutoSave) ModPreferences.SavePref();
+            if(TimelineHelper.UsingTimeline) TimelineHelper.TimelineCamera.fieldOfView = fov;
+            
+            if (ModPreferences.AutoSave) ModPreferences.SavePreferences();
             if (!syncElementValue) return;
             if (fovEle != null) fovEle.Value = fov;
         }
-
-        public static void ApplyOther(ModEnums.OtherType type, bool value, bool syncElement = false)
+        
+        public static void TogglePostFX(bool enabled, bool syncElementValue = false)
+        {
+            Mod.ScVolumeComponent.enabled = enabled;
+            if(TimelineHelper.UsingTimeline) TimelineHelper.TimelineVolume.enabled = enabled;
+            
+            if (syncElementValue) ModMenu.PostFXToggle.Value = enabled;
+            if (ModPreferences.AutoSave) ModPreferences.SavePreferences();
+        }
+        
+        private static bool _currentHeadMeshState = true;
+        private static bool _currentHairMeshState = true;
+        public static void ToggleAvatarMesh(ModEnums.MeshToggleType type)
         {
             switch (type)
             {
-                case ModEnums.OtherType.PostFX:
-                    Mod.ScVolumeComponent.enabled = value;
+                case ModEnums.MeshToggleType.HeadMesh:
+                    _currentHeadMeshState = !_currentHeadMeshState;
+                    if(_currentHairMeshState) Mod.PlayerArtComponent.EnableHead();
+                    else Mod.PlayerArtComponent.DisableHead();
+                    foreach (var mesh in Player.Avatar.headMeshes) mesh.enabled = _currentHeadMeshState;
                     break;
-                case ModEnums.OtherType.HeadMesh:
-                    if (value == false) Mod.RmPlayerArtComponent.DisableHead();
-                    else Mod.RmPlayerArtComponent.EnableHead();
-                    foreach (var mesh in Player.Avatar.headMeshes) mesh.enabled = value;
+                case ModEnums.MeshToggleType.HairMeshes:
+                    _currentHairMeshState = !_currentHairMeshState;
+                    if(_currentHairMeshState) Mod.PlayerArtComponent.EnableHair();
+                    else Mod.PlayerArtComponent.DisableHair();
+                    foreach (var mesh in Player.Avatar.hairMeshes) mesh.enabled = _currentHairMeshState;
                     break;
-
-                case ModEnums.OtherType.HairMeshes:
-                    if (value == false) Mod.RmPlayerArtComponent.DisableHair();
-                    else Mod.RmPlayerArtComponent.EnableHair();
-                    foreach (var mesh in Player.Avatar.hairMeshes) mesh.enabled = value;
+                case ModEnums.MeshToggleType.HeasdMeshOffset:
+                    Mod.PlayerArtComponent.enabled = !Mod.PlayerArtComponent.enabled;
                     break;
             }
-
-            if (syncElement)
-            {
-                ModMenu.PostFXToggle.Value = value;
-            }
-
         }
-
-        public static void ApplyOffset(Vector3 offset, ModEnums.OffsetType offsetType, bool syncElementValue = false,
-            FloatElement eleX = null, FloatElement eleY = null, FloatElement eleZ = null)
+        
+        public static void UpdateOffset(Vector3 offset, ModEnums.OffsetType offsetType, bool syncElementValue = false)
         {
             switch (offsetType)
             {
                 case ModEnums.OffsetType.Position:
                     Mod.StTransform.localPosition = offset;
+                    if(!syncElementValue) return;
+                    ModMenu.XpOffset.Value = offset.x;
+                    ModMenu.YpOffset.Value = offset.y;
+                    ModMenu.ZpOffset.Value = offset.z;
                     break;
 
                 case ModEnums.OffsetType.Rotation:
                     Mod.StTransform.localRotation = Quaternion.Euler(offset);
+                    if (!syncElementValue) return;
+                    ModMenu.XrOffset.Value = offset.x;
+                    ModMenu.YrOffset.Value = offset.y;
+                    ModMenu.ZrOffset.Value = offset.z;
                     break;
-            }
-
-            if (syncElementValue)
-            {
-                if (eleX != null) eleX.Value = offset.x;
-                if (eleY != null) eleY.Value = offset.y;
-                if (eleZ != null) eleZ.Value = offset.z;
             }
         }
 
-        public static void ApplyOffset(ModEnums.OffsetType type)
+        public static void UpdateOffset(ModEnums.OffsetType type)
         {
             switch (type)
             {
@@ -129,28 +155,54 @@ namespace WideEye.Utilities
                     break;
             }
 
-            if (ModPreferences.AutoSave) ModPreferences.SavePref();
+            if (ModPreferences.AutoSave) ModPreferences.SavePreferences();
         }
 
-        public static void ApplySmoothing(float rotationSmoothingValue, float positionSmoothingValue,
-            bool syncElementValue)
+        public static void UpdateSmoothing(float rotationSmoothingValue, float positionSmoothingValue, bool syncElementValue)
         {
             Mod.ScSmootherComponent.RotationalSmoothTime = rotationSmoothingValue;
             Mod.ScSmootherComponent.TranslationSmoothTime = positionSmoothingValue;
+            if (TimelineHelper.UsingTimeline)
+            {
+                TimelineHelper.TimelineSmoothFollower.RotationalSmoothTime = rotationSmoothingValue;
+                TimelineHelper.TimelineSmoothFollower.TranslationSmoothTime = positionSmoothingValue;
+            }
+            
             if (!syncElementValue) return;
 
             ModMenu.RSmoothing.Value = rotationSmoothingValue;
             ModMenu.PSmoothing.Value = positionSmoothingValue;
         }
 
-        public static void ApplySmoothing()
+        public static void UpdateSmoothing()
         {
             Mod.ScSmootherComponent.RotationalSmoothTime = ModMenu.RSmoothing.Value;
             Mod.ScSmootherComponent.TranslationSmoothTime = ModMenu.PSmoothing.Value;
-            if (ModPreferences.AutoSave) ModPreferences.SavePref();
+            if (TimelineHelper.UsingTimeline)
+            {
+                TimelineHelper.TimelineSmoothFollower.RotationalSmoothTime = ModMenu.RSmoothing.Value;
+                TimelineHelper.TimelineSmoothFollower.TranslationSmoothTime = ModMenu.PSmoothing.Value;
+            }
+
+            if (ModPreferences.AutoSave) ModPreferences.SavePreferences();
         }
 
-        public static void ApplyLd(bool enabled, Vector2 center, float intensity, float scale, float xMulti,
+        public static void UpdateMkGlow(bool enabled, bool syncElements)
+        {
+            Mod.MKGlowOverride.active = enabled;
+            if (syncElements)
+            {
+                ModMenu.MkGlowEnabled.Value = enabled;
+            }
+        }
+
+        public static void UpdateMkGlow()
+        {
+            Mod.MKGlowOverride.active = ModMenu.MkGlowEnabled.Value;
+            if (ModPreferences.AutoSave) ModPreferences.SavePreferences();
+        }
+
+        public static void UpdateLensDistortion(bool enabled, Vector2 center, float intensity, float scale, float xMulti,
             float yMulti, bool syncElements)
         {
             Mod.LensDistortionOverride.active = enabled;
@@ -171,7 +223,7 @@ namespace WideEye.Utilities
             }
         }
 
-        public static void ApplyLd()
+        public static void UpdateLensDistortion()
         {
             Mod.LensDistortionOverride.active = ModMenu.LdEnabled.Value;
             Mod.LensDistortionOverride.center.value = new(ModMenu.LdCenterX.Value, ModMenu.LdCenterY.Value);
@@ -179,10 +231,10 @@ namespace WideEye.Utilities
             Mod.LensDistortionOverride.scale.value = ModMenu.LdScale.Value;
             Mod.LensDistortionOverride.xMultiplier.value = ModMenu.LdXMultiplier.Value;
             Mod.LensDistortionOverride.yMultiplier.value = ModMenu.LdYMultiplier.Value;
-            if (ModPreferences.AutoSave) ModPreferences.SavePref();
+            if (ModPreferences.AutoSave) ModPreferences.SavePreferences();
         }
 
-        public static void ApplyCa(bool enabled, float intensity, bool syncElements)
+        public static void UpdateChromaticAberration(bool enabled, float intensity, bool syncElements)
         {
             Mod.ChromaticAberrationOverride.active = enabled;
             Mod.ChromaticAberrationOverride.intensity.value = intensity;
@@ -191,14 +243,14 @@ namespace WideEye.Utilities
             ModMenu.CaIntensity.Value = intensity;
         }
 
-        public static void ApplyCa()
+        public static void UpdateChromaticAberration()
         {
             Mod.ChromaticAberrationOverride.active = ModMenu.CaEnabled.Value;
             Mod.ChromaticAberrationOverride.intensity.value = ModMenu.CaIntensity.Value;
-            if (ModPreferences.AutoSave) ModPreferences.SavePref();
+            if (ModPreferences.AutoSave) ModPreferences.SavePreferences();
         }
 
-        public static void ApplyAe(bool enabled, AutoExposureAdaptationMode adaptationMode, float d2Ls, float evCompen,
+        public static void UpdateAutoExposure(bool enabled, AutoExposureAdaptationMode adaptationMode, float d2Ls, float evCompen,
             float evMax, float evMin, float l2Ds, AutoExposureMeteringMaskMode meteringMaskMode,
             float meteringProceduralFalloff, bool syncElements)
         {
@@ -225,7 +277,7 @@ namespace WideEye.Utilities
             ModMenu.AeMeteringProceduralFalloff.Value = meteringProceduralFalloff;
         }
 
-        public static void ApplyAe()
+        public static void UpdateAutoExposure()
         {
             Mod.AutoExposureOverride.active = ModMenu.AeEnabled.Value;
             Mod.AutoExposureOverride.adaptationMode.value = (AutoExposureAdaptationMode)ModMenu.AeAdaptationMode.Value;
@@ -237,7 +289,7 @@ namespace WideEye.Utilities
             Mod.AutoExposureOverride.meteringMaskMode.value =
                 (AutoExposureMeteringMaskMode)ModMenu.AeMeteringMaskMode.Value;
             Mod.AutoExposureOverride.meteringProceduralFalloff.value = ModMenu.AeMeteringProceduralFalloff.Value;
-            if (ModPreferences.AutoSave) ModPreferences.SavePref();
+            if (ModPreferences.AutoSave) ModPreferences.SavePreferences();
         }
     }
 }

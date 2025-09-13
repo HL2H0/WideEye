@@ -4,8 +4,7 @@ using Il2CppSLZ.Bonelab;
 using Il2CppSLZ.Marrow;
 using MelonLoader;
 using UnityEngine;
-using UnityEngine.Rendering;
-
+using UnityEngine.Rendering; 
 using WideEye.Core;
 using WideEye.UI;
 
@@ -16,65 +15,92 @@ public static class SpectatorCameraManager
     {
         if (HelperMethods.IsAndroid())
         {
-            var notification = new ModNotification(ModNotification.ModNotificationType.Force, "WideEye | Error", "WideEye doesn't work with Quest", NotificationType.Error, 3f);
-            notification.Show();
+            Notifier.Send(new Notification
+            {
+                Title = "WideEye | Error",
+                Message = "WideEye doesn't work with Quest",
+                Type = NotificationType.Error,
+                PopupLength = 3,
+                ShowTitleOnPopup = true
+            });
+            
+            MelonLogger.Error("WideEye doesn't work with Quest");
+            return;
         }
-        else
+
+        if (Mod.FoundCamera) return;
+        
+        Mod.ScGameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
+        Mod.StGameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
+
+        if (!Mod.ScGameObject || !Mod.StGameObject)
         {
-            Mod.ScGameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
-            Mod.StGameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
-
-            if (!Mod.ScGameObject || !Mod.StGameObject)
+            var message = isAuto 
+                ? "Couldn't find the camera automatically.\nChange startup delay then reload the map or use the manual button."
+                : "Couldn't find the camera.\nPlease use the manual button to find it.";
+            
+            Notifier.Send(new Notification
             {
-                if (isAuto)
-                {
-                    var notification = new ModNotification(ModNotification.ModNotificationType.Force, "WideEye | Error", "Couldn't find the camera automatically.\nChange startup delay then reload the map", NotificationType.Error, 3);
-                    notification.Show();
-                    MelonLogger.Error("Couldn't find the camera automatically");
-                    ModMenu.MainPage.Add(ModMenu.GetCameraButton);
-                }
-                else
-                {
-                    var notification = new ModNotification(ModNotification.ModNotificationType.Force, "WideEye | Error", "Couldn't find the camera.", NotificationType.Error, 3);
-                    notification.Show();
-                    MelonLogger.Error("Couldn't find the camera");
-                }
-            }
-            else if (!Mod.FoundCamera)
-            {
-                if (!Mod.ScGameObject.active)
-                {
-                    var notification = new ModNotification(ModNotification.ModNotificationType.CameraDisabled, "WideEye | Warning", "Spectator Camera Is Not Active.\nModifications will not take action.", NotificationType.Warning, 3);
-                    notification.Show();
-                    MelonLogger.Warning("Spectator Camera Is Not Active. Modifications will not take action.");
-                }
+                Title = "WideEye | Error",
+                Message = message,
+                Type = NotificationType.Error,
+                PopupLength = 5,
+                ShowTitleOnPopup = true
+            });
+            MelonLogger.Error(isAuto ? "Couldn't find the camera automatically" : "Couldn't find the camera");
+            return;
+        }
 
-                Mod.RmPlayerArtComponent = Player.ControllerRig.gameObject.GetComponent<PlayerAvatarArt>();
-                Mod.StTransform = Mod.StGameObject.GetComponent<Transform>();
-                Mod.ScSmootherComponent = Mod.ScGameObject.GetComponent<SmoothFollower>();
-                Mod.ScVolumeComponent = Mod.ScGameObject.GetComponent<Volume>();
-                Mod.ScCameraComponent = Mod.ScGameObject.GetComponent<Camera>();
-                GetPostFXOverrides();
-                if (isAuto)
+        if (!Mod.FoundCamera)
+        {
+            if (!Mod.ScGameObject.active)
+            {
+                Notifier.Send(new Notification
                 {
-                    MelonLogger.Msg(ConsoleColor.Green, "Found camera automatically");
-                }
-                else
-                {
-                    ModMenu.MainPage.Remove(ModMenu.GetCameraButton);
-                    var notification = new ModNotification(ModNotification.ModNotificationType.CameraFound, "WideEye | Success", "Found camera manually", NotificationType.Success, 3);
-                    notification.Show();
-                    MelonLogger.Msg(ConsoleColor.Green, "Found camera manually");
-                }
-                Mod.FoundCamera = true;
+                    Title = "WideEye | Warning",
+                    Message = "Spectator Camera is not active.\nChange the spectator mode to \"Fish Eye\" ",
+                    Type = NotificationType.Warning,
+                    PopupLength = 5,
+                    ShowTitleOnPopup = true
+                });
+                MelonLogger.Warning("Spectator Mode isn't set to \"Fish Eye\"Change it so WideEye can work");
             }
+
+            InitializeComponents();
+            HandleCameraFound(isAuto);
+            Mod.FoundCamera = true;
         }
     }
 
-    private static void GetPostFXOverrides()
+    private static void InitializeComponents()
     {
-        Mod.ScVolumeComponent.profile.TryGet(out Mod.LensDistortionOverride);
-        Mod.ScVolumeComponent.profile.TryGet(out Mod.ChromaticAberrationOverride);
-        Mod.ScVolumeComponent.profile.TryGet(out Mod.AutoExposureOverride);
+        Mod.PlayerArtComponent = Player.ControllerRig.gameObject.GetComponent<PlayerAvatarArt>();
+        Mod.StTransform = Mod.StGameObject.GetComponent<Transform>();
+        Mod.ScSmootherComponent = Mod.ScGameObject.GetComponent<SmoothFollower>();
+        Mod.ScVolumeComponent = Mod.ScGameObject.GetComponent<Volume>();
+        Mod.ScCameraComponent = Mod.ScGameObject.GetComponent<Camera>();
+        Mod.ScVolumeComponent.sharedProfile.TryGet(out Mod.MKGlowOverride);
+        Mod.ScVolumeComponent.sharedProfile.TryGet(out Mod.LensDistortionOverride);
+        Mod.ScVolumeComponent.sharedProfile.TryGet(out Mod.ChromaticAberrationOverride);
+        Mod.ScVolumeComponent.sharedProfile.TryGet(out Mod.AutoExposureOverride);
+    }
+
+    private static void HandleCameraFound(bool isAuto)
+    {
+        
+        if (!isAuto)
+        {
+            var notification = new Notification
+            {
+                Title = "WideEye | Success",
+                Message = "Found camera manually",
+                Type = NotificationType.Success,
+                PopupLength = 3,
+                ShowTitleOnPopup = true
+            };
+            Notifier.Send(notification);
+        }
+        
+        MelonLogger.Msg(ConsoleColor.Green, isAuto ? "Found camera automatically" : "Found camera manually");
     }
 }
