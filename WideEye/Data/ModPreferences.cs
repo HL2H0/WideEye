@@ -120,9 +120,8 @@ namespace WideEye.Data
             SettingsUpdater.UpdateOffset(_positionOffset.Value, ModEnums.OffsetType.Position, true);
             SettingsUpdater.UpdateSmoothing(_rotationSmoothing.Value, _positionSmoothing.Value, true);
             
-            
+            ModMenu.StartupDelay.Value = _startupDelay.Value;
             ModMenu.ChangeViewOnSpawn.Value = _changeViewOnSpawn.Value;
-            
             ModMenu.AutoSave.Value = _autoSave.Value;
             AutoSave = _autoSave.Value;
             
@@ -158,9 +157,7 @@ namespace WideEye.Data
             _positionSmoothing.Value = ModMenu.PSmoothing.Value;
 
             _startupDelay.Value = ModMenu.StartupDelay.Value;
-            
             _changeViewOnSpawn.Value = ModMenu.ChangeViewOnSpawn.Value;
-            
             _autoSave.Value = ModMenu.AutoSave.Value;
             
             _freeCamSpeed.Value = ModMenu.FreeCamSpeed.Value;
