@@ -19,7 +19,14 @@ public class TimelineHelper
         if (! CheckForTimeline()) return;
         UsingTimeline = true;
         CreateMenuOptions();
-        GetTimelineObjects();
+        GetReferences();
+    }
+    
+    public static void ResetReferences()
+    {
+        TimelineCamera = null;
+        TimelineSmoothFollower = null;
+        TimelineVolume = null;
     }
     
     private static bool CheckForTimeline()
@@ -28,7 +35,7 @@ public class TimelineHelper
         return mod != null;
     }
 
-    private static void GetTimelineObjects()
+    private static void GetReferences()
     {
         var timelineCam = GameObject.Find("Spectator Camera(Clone)/Spectator Camera");
         if (timelineCam != null)
@@ -46,7 +53,7 @@ public class TimelineHelper
         if (_createdMenu) return;
         var page = ModMenu.ModSettingsPage.CreatePage("Timeline", Color.yellow);
         page.CreateFunction("Timeline Helper is Running", Color.green, null);
-        page.CreateFunction("Update Timeline References", Color.yellow, GetTimelineObjects);
+        page.CreateFunction("Update Timeline References", Color.yellow, GetReferences);
         _createdMenu = true;
     }
 }

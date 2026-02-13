@@ -29,14 +29,20 @@ public static class CameraController
                         Title = "WideEye | Error",
                         Message = "Handheld camera not spawned\nPlease spawn the camera first",
                         Type = NotificationType.Error,
-                        PopupLength = 3
+                        PopupLength = 3,
+                        ShowTitleOnPopup = true
                     });
                 }
                 Mod.ScSmootherComponent.targetTransform = HandheldCameraManager.ActiveScript.cameraTarget;
+
                 if(TimelineHelper.UsingTimeline) 
                     TimelineHelper.TimelineSmoothFollower.targetTransform = HandheldCameraManager.ActiveScript.cameraTarget;
+
+                if(TimelineHelper.TimelineCamera.gameObject.active)
+                    HandheldCameraManager.ActiveScript.SyncCamera = TimelineHelper.TimelineCamera;
+                else
+                    HandheldCameraManager.ActiveScript.SyncCamera = Mod.ScCameraComponent;
                 
-                HandheldCameraManager.ActiveScript.SyncCamera = Mod.ScCameraComponent;
                 SettingsUpdater.UpdateFOV(HandheldCameraManager.ActiveScript.FOV);
                 FreeCamManager.FreeCamObject.SetActive(false);
                 break;

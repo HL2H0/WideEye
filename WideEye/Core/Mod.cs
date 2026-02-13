@@ -60,6 +60,11 @@ namespace WideEye.Core
             LoggerInstance.Msg($"WideEye {BuildInfo.Version} Has Been Initialized.");
         }
 
+        public override void OnUpdate()
+        {
+            
+        }
+
         private void BoneLib_OnUIRigCreated()
         {
             MelonCoroutines.Start(StartWideEye(ModPreferences.StartupDelay));
@@ -95,6 +100,7 @@ namespace WideEye.Core
             if (TimelineHelper.UsingTimeline)
             {
                 TimelineHelper.UsingTimeline = false;
+                TimelineHelper.ResetReferences();
             }
             if (!HandheldCameraManager.Found) return;
             HandheldCameraManager.ActiveHandheldCamera = null;
