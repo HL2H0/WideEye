@@ -26,7 +26,6 @@ namespace WideEye.Data
         private static MelonPreferences_Entry<bool> _autoSave;
         private static MelonPreferences_Entry<int> _startupDelay;
         private static MelonPreferences_Entry<bool> _changeViewOnSpawn;
-        private static MelonPreferences_Entry<bool> _handheldAudioSource;
         
         private static MelonPreferences_Entry<float> _freeCamSpeed;
         private static MelonPreferences_Entry<float> _freeCamFastSpeed;
@@ -82,7 +81,6 @@ namespace WideEye.Data
             _freeCamScrollSmoothing = _categWideEye.CreateEntry("FreeCamScrollSmoothing", 10f);
             _freecamIndicator = _categWideEye.CreateEntry("FreeCamIndicator", true);
             _changeViewOnSpawn = _categWideEye.CreateEntry("ChangeViewOnSpawn", true);
-            _handheldAudioSource = _categWideEye.CreateEntry("Handheld AudioSource", true);
             
             _categPfxMk = MelonPreferences.CreateCategory("WideEye_PostFX_MKGlow");
             _mkEnabled = _categPfxMk.CreateEntry("Enabled", true);
