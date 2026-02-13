@@ -318,13 +318,13 @@ namespace WideEye.UI
             //---------------------------------
             ModSettingsPage = MainPage.CreatePage("Mod Settings", Color.green);
 
+            ModSettingsPage.CreateFunction("Get Camera Manually", Color.red, () => SpectatorCameraManager.GetSpectatorCamera(false));
             StartupDelay = ModSettingsPage.CreateInt("Startup Delay (Seconds)", Color.cyan, 5, 1, 2, int.MaxValue, v => ModPreferences.StartupDelay = v);
             AutoSave = ModSettingsPage.CreateBool("Auto Save", Color.magenta, false, v => ModPreferences.AutoSave = v);
             
             ModSettingsPage.CreateFunction("Reset All To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.All));
             ModSettingsPage.CreateFunction("Load Preferences", Color.green, ModPreferences.LoadPreferences);
             ModSettingsPage.CreateFunction("Clear All Preferences", Color.red, ModPreferences.ClearPreferences);
-            ModSettingsPage.CreateFunction("Get Camera", Color.red, () => SpectatorCameraManager.GetSpectatorCamera(false));
             SupportPage = ModSettingsPage.CreatePage("Support", Color.white);
             SupportPage.CreateFunction("Open GitHub Issues", Color.white, () =>
             {

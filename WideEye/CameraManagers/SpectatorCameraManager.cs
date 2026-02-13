@@ -36,8 +36,8 @@ public static class SpectatorCameraManager
         if (!Mod.ScGameObject || !Mod.StGameObject)
         {
             var message = isAuto 
-                ? "Couldn't find the camera automatically.\nChange startup delay then reload the map or use the manual button."
-                : "Couldn't find the camera.\nPlease use the manual button to find it.";
+                ? "Couldn't find the camera automatically.\nYou can use the manual button in the settings"
+                : "Couldn't find the camera.\nPlease use the manual button ";
             
             Notifier.Send(new Notification
             {
