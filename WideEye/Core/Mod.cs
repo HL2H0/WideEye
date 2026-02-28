@@ -68,6 +68,7 @@ namespace WideEye.Core
         private void BoneLib_OnUIRigCreated()
         {
             MelonCoroutines.Start(StartWideEye(ModPreferences.StartupDelay));
+            MenuShortcut.CreateShortcut();
             MelonLogger.Msg(System.ConsoleColor.Green, "UI Rig Created, Trying To Get Camera...");
         }
         
