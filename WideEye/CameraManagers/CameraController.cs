@@ -33,16 +33,15 @@ public static class CameraController
                         ShowTitleOnPopup = true
                     });
                 }
-                Mod.ScSmootherComponent.targetTransform = HandheldCameraManager.ActiveScript.cameraTarget;
-
-                if(TimelineHelper.UsingTimeline) 
-                    TimelineHelper.TimelineSmoothFollower.targetTransform = HandheldCameraManager.ActiveScript.cameraTarget;
-
-                if(TimelineHelper.TimelineCamera.gameObject.active)
-                    HandheldCameraManager.ActiveScript.SyncCamera = TimelineHelper.TimelineCamera;
-                else
-                    HandheldCameraManager.ActiveScript.SyncCamera = Mod.ScCameraComponent;
                 
+                if (TimelineHelper.UsingTimeline)
+                {
+                    TimelineHelper.TimelineSmoothFollower.targetTransform = HandheldCameraManager.ActiveScript.cameraTarget;
+                    HandheldCameraManager.ActiveScript.SyncCamera = TimelineHelper.TimelineCamera.gameObject.active
+                        ? TimelineHelper.TimelineCamera
+                        : Mod.ScCameraComponent;
+                }
+                Mod.ScSmootherComponent.targetTransform = HandheldCameraManager.ActiveScript.cameraTarget;
                 SettingsUpdater.UpdateFOV(HandheldCameraManager.ActiveScript.FOV);
                 FreeCamManager.FreeCamObject.SetActive(false);
                 break;
