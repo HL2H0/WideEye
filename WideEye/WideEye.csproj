@@ -6,8 +6,8 @@
 		<RootNamespace>WideEye</RootNamespace>
 		<LangVersion>default</LangVersion>
 		<IsPackable>false</IsPackable>
-		<AssemblyVersion>3.1.0.0</AssemblyVersion>
-		<FileVersion>1.0.0.0</FileVersion>
+		<AssemblyVersion>4.1.0.0</AssemblyVersion>
+		<FileVersion>4.1.0.0</FileVersion>
 		<NeutralLanguage>en-US</NeutralLanguage>
 		<AssemblyName>WideEye</AssemblyName>
 		<LangVersion>latest</LangVersion>
@@ -30,6 +30,7 @@
 	  <Compile Include="Data\WideEyeSettings.cs" />
 	  <Compile Include="Objects\SerializableVector2.cs" />
 	  <Compile Include="Objects\SerializableVector3.cs" />
+	  <Compile Include="UI\MenuShortcut.cs" />
 	  <Compile Include="UI\ModMenu.cs" />
 	  <Compile Include="Utilities\Paths.cs" />
 	  <Compile Include="Utilities\SettingsUpdater.cs" />
