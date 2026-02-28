@@ -1,3 +1,4 @@
+using System;
 using Il2CppTMPro;
 using UnityEngine;
 using WideEye.CameraManagers;
@@ -46,7 +47,6 @@ namespace WideEye.Behaviors
         {
             if (ModPreferences.ChangeViewOnSpawn)
                 CameraController.UpdateView(ModEnums.ViewMode.Handheld, true);
-            CameraController.UpdateAudioSource(ModEnums.AudioSource.Head, true);
         }
 
         private void OnDisable()
@@ -54,6 +54,7 @@ namespace WideEye.Behaviors
             CameraController.UpdateView(ModEnums.ViewMode.Head, true);
             HandheldCameraManager.ActiveHandheldCamera = null;
             HandheldCameraManager.ActiveScript = null;
+            CameraController.UpdateAudioSource(ModEnums.AudioSource.Head, true);
         }
         
         
