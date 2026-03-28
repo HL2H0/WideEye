@@ -110,6 +110,7 @@ namespace WideEye.UI
         
         public static BoolElement AutoSave { get; private set; }
         public static IntElement StartupDelay { get; private set; }
+        public static BoolElement HideNonErrorNotifications { get; private set; }
 
 
         public static void CreatePresetsPage()
@@ -277,7 +278,7 @@ namespace WideEye.UI
             PresetsPage.CreateFunction("Open Presets Folder", Color.yellow, () =>
             {
                 Process.Start("explorer.exe", Paths.PresetsPath);
-                
+                if(ModPreferences.HideNonErrorNotification) return;
                 Notifier.Send(new Notification
                 {
                     Title = "WideEye | Success",
@@ -321,7 +322,7 @@ namespace WideEye.UI
             ModSettingsPage.CreateFunction("Get Camera Manually", Color.red, () => SpectatorCameraManager.GetSpectatorCamera(false));
             StartupDelay = ModSettingsPage.CreateInt("Startup Delay (Seconds)", Color.cyan, 5, 1, 2, int.MaxValue, v => ModPreferences.StartupDelay = v);
             AutoSave = ModSettingsPage.CreateBool("Auto Save", Color.magenta, false, v => ModPreferences.AutoSave = v);
-            
+            HideNonErrorNotifications = ModSettingsPage.CreateBool("Hide Non Error Notification", Color.magenta, false, v => ModPreferences.HideNonErrorNotification = v);
             ModSettingsPage.CreateFunction("Reset All To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.All));
             ModSettingsPage.CreateFunction("Load Preferences", Color.green, ModPreferences.LoadPreferences);
             ModSettingsPage.CreateFunction("Clear All Preferences", Color.red, ModPreferences.ClearPreferences);
@@ -329,6 +330,7 @@ namespace WideEye.UI
             SupportPage.CreateFunction("Open GitHub Issues", Color.white, () =>
             {
                 Application.OpenURL("https://github.com/HL2H0/WideEye/issues");
+                if(ModPreferences.HideNonErrorNotification) return;
                 Notifier.Send(new Notification
                 {
                     Title = "WideEye | Success",
@@ -341,7 +343,8 @@ namespace WideEye.UI
 
             SupportPage.CreateFunction("Discord", Color.blue, () =>
             {
-                GUIUtility.systemCopyBuffer = "@hiiiiiiiiiiiiiiiiii";
+                GUIUtility.systemCopyBuffer = "@HL2H0";
+                if(ModPreferences.HideNonErrorNotification) return;
                 Notifier.Send(new Notification
                 {
                     Title = "WideEye | Success",

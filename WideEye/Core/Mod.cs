@@ -84,7 +84,7 @@ namespace WideEye.Core
             TimelineHelper.StartHelper();
             
             if (!ResourcesManager.Loaded || !ResourcesManager.PalletInstalled) yield break;
-            
+            if(ModPreferences.HideNonErrorNotification) yield break;
             Notifier.Send(new Notification
             {
                 Title = "WideEye | Success",

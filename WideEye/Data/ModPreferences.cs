@@ -11,6 +11,12 @@ namespace WideEye.Data
 {
     public static class ModPreferences
     {
+        public static bool HideNonErrorNotification
+        {
+            get => _hideNonErrorNotification.Value;
+            set => _hideNonErrorNotification.Value = value; 
+        }
+
         public static bool AutoSave;
         public static int StartupDelay { get => _startupDelay.Value; set => _startupDelay.Value = value; }
         public static bool ChangeViewOnSpawn { get => _changeViewOnSpawn.Value; set => _changeViewOnSpawn.Value = value; }
@@ -22,7 +28,8 @@ namespace WideEye.Data
         private static MelonPreferences_Entry<Vector3> _positionOffset;
         private static MelonPreferences_Entry<float> _rotationSmoothing;
         private static MelonPreferences_Entry<float> _positionSmoothing;
-        
+
+        private static MelonPreferences_Entry<bool> _hideNonErrorNotification;
         private static MelonPreferences_Entry<bool> _autoSave;
         private static MelonPreferences_Entry<int> _startupDelay;
         private static MelonPreferences_Entry<bool> _changeViewOnSpawn;
@@ -72,6 +79,7 @@ namespace WideEye.Data
             _rotationSmoothing = _categWideEye.CreateEntry("RotationSmoothing", 0f);
             _positionSmoothing = _categWideEye.CreateEntry("PositionSmoothing", 0f);
             _startupDelay = _categWideEye.CreateEntry("StartupDelay", 5);
+            _hideNonErrorNotification = _categWideEye.CreateEntry("HideNonErrorNotification", false);
             _autoSave = _categWideEye.CreateEntry("AutoSave", false);
             _freeCamSpeed = _categWideEye.CreateEntry("FreeCamSpeed", 3f);
             _freeCamFastSpeed = _categWideEye.CreateEntry("FreeCamFastSpeed", 7f);
@@ -118,6 +126,7 @@ namespace WideEye.Data
             SettingsUpdater.UpdateOffset(_positionOffset.Value, ModEnums.OffsetType.Position, true);
             SettingsUpdater.UpdateSmoothing(_rotationSmoothing.Value, _positionSmoothing.Value, true);
             
+            ModMenu.HideNonErrorNotifications.Value = _hideNonErrorNotification.Value;
             ModMenu.StartupDelay.Value = _startupDelay.Value;
             ModMenu.ChangeViewOnSpawn.Value = _changeViewOnSpawn.Value;
             ModMenu.AutoSave.Value = _autoSave.Value;
@@ -157,6 +166,7 @@ namespace WideEye.Data
             _startupDelay.Value = ModMenu.StartupDelay.Value;
             _changeViewOnSpawn.Value = ModMenu.ChangeViewOnSpawn.Value;
             _autoSave.Value = ModMenu.AutoSave.Value;
+            _hideNonErrorNotification.Value = ModMenu.HideNonErrorNotifications.Value;
             
             _freeCamSpeed.Value = ModMenu.FreeCamSpeed.Value;
             _freeCamFastSpeed.Value = ModMenu.FreeCamFastSpeed.Value;
@@ -194,6 +204,8 @@ namespace WideEye.Data
 
             if (AutoSave) return;
             
+            MelonLogger.Msg(ConsoleColor.Green, "Saved Preferences.");
+            if(HideNonErrorNotification) return;
             Notifier.Send(new Notification
             {
                 Title = "WideEye | Success",
@@ -202,7 +214,6 @@ namespace WideEye.Data
                 PopupLength = 2,
                 ShowTitleOnPopup = true
             });
-            MelonLogger.Msg(ConsoleColor.Green, "Saved Preferences.");
         }
         
         
@@ -222,6 +233,8 @@ namespace WideEye.Data
             
             LoadPreferences();
             
+            MelonLogger.Msg(ConsoleColor.Green, "Done!, Cleared All Preferences");
+            if(HideNonErrorNotification) return;
             Notifier.Send(new Notification
             {
                 Title = "WideEye | Success",
@@ -230,7 +243,6 @@ namespace WideEye.Data
                 PopupLength = 2,
                 ShowTitleOnPopup = true
             });
-            MelonLogger.Msg(ConsoleColor.Green, "Done!, Cleared All Preferences");
         }
     }
 }
