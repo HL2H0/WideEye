@@ -80,6 +80,8 @@ namespace WideEye.Data
             if (Presets.ContainsKey(presetName))
             {
                 var newValues = ModMenu.GetValues();
+                newValues.Name = presetName;
+                newValues.Version = BuildInfo.Version;
                 Presets[presetName] = newValues;
                 
                 var json = JsonSerializer.Serialize(newValues, _options);
