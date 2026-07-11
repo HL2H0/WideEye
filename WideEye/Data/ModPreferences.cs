@@ -133,11 +133,17 @@ namespace WideEye.Data
             AutoSave = _autoSave.Value;
             
             FreeCamManager.MoveSpeed = _freeCamSpeed.Value;
+            ModMenu.FreeCamSpeed.Value = _freeCamSpeed.Value;
             FreeCamManager.FastMoveSpeed = _freeCamFastSpeed.Value;
+            ModMenu.FreeCamFastSpeed.Value = _freeCamFastSpeed.Value;
             FreeCamManager.Sensitivity = _freeCamSensitivity.Value;
+            ModMenu.FreeCamSensitivity.Value = _freeCamSensitivity.Value;
             FreeCamManager.SmoothSpeed = _freeCamSmoothSpeed.Value;
+            ModMenu.FreeCamSmoothSpeed.Value = _freeCamSmoothSpeed.Value;
             FreeCamManager.ScrollSensitivity = _freeCamScrollSensitivity.Value;
+            ModMenu.FreeCamScrollSensitivity.Value = _freeCamScrollSensitivity.Value;
             FreeCamManager.ScrollSmoothing = _freeCamScrollSmoothing.Value;
+            ModMenu.FreeCamScrollSmoothing.Value = _freeCamScrollSmoothing.Value;
             FreeCamManager.ShowIndicator = _freecamIndicator.Value;
 
             SettingsUpdater.UpdateMkGlow(_mkEnabled.Value, true);
