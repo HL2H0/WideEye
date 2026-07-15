@@ -62,7 +62,16 @@ namespace WideEye.Core
 
         public override void OnUpdate()
         {
+            if(!FoundCamera) return;
             
+            //Freecam/Head Toggle
+            if (Input.GetKeyDown(KeyCode.F5))
+            {
+                CameraController.UpdateView(CameraController.ActiveViewMode == ModEnums.ViewMode.FreeCam
+                    ? ModEnums.ViewMode.Head
+                    : ModEnums.ViewMode.FreeCam,
+                    true);
+            }
         }
 
         private void BoneLib_OnUIRigCreated()
