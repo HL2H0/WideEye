@@ -6,7 +6,6 @@ using MelonLoader;
 using UnityEngine;
 using UnityEngine.Rendering; 
 using WideEye.Core;
-using WideEye.UI;
 
 namespace WideEye.CameraManagers;
 public static class SpectatorCameraManager
@@ -30,8 +29,10 @@ public static class SpectatorCameraManager
 
         if (Mod.FoundCamera) return;
         
-        Mod.ScGameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
-        Mod.StGameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
+        // Mod.ScGameObject = GameObject.Find("GameplaySystems [0]/DisabledContainer/Spectator Camera/Spectator Camera");
+        // Mod.StGameObject = GameObject.Find("RigManager(bonelab) [0]/VRControllerRig/TrackingSpace/Headset/Spectator Target");
+        Mod.ScGameObject = Player.UIRig.transform.parent.Find("Spectator Camera/Spectator Camera").gameObject;
+        Mod.StGameObject = Player.ControllerRig.transform.Find("TrackingSpace/Headset/Spectator Target").gameObject;
 
         if (!Mod.ScGameObject || !Mod.StGameObject)
         {
