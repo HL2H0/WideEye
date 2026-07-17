@@ -57,12 +57,15 @@ namespace WideEye.Core
             ModMenu.SetupBoneMenu();
             Hooking.OnLevelUnloaded += BoneLib_OnLevelUnloaded;
             Hooking.OnUIRigCreated += BoneLib_OnUIRigCreated;
+            Task.Run(VersionCheck.CheckForUpdates);
             LoggerInstance.Msg($"WideEye {BuildInfo.Version} Has Been Initialized.");
         }
 
         public override void OnUpdate()
         {
             if(!FoundCamera) return;
+            
+            // -- Shortcuts --
             
             //Freecam/Head Toggle
             if (Input.GetKeyDown(KeyCode.F5))
@@ -92,8 +95,27 @@ namespace WideEye.Core
 
             TimelineHelper.StartHelper();
             
+            //Check if there are no errors before sending a success notification
             if (!ResourcesManager.Loaded || !ResourcesManager.PalletInstalled) yield break;
             if(ModPreferences.HideNonErrorNotification) yield break;
+            if (!FoundCamera) yield break;
+            
+            if (ModPreferences.HideNonErrorNotification) yield break;
+            
+            if (VersionCheck.Fetched && !VersionCheck.IsLatest)
+            {
+                Notifier.Send(new Notification
+                {
+                    Title = "WideEye | Info",
+                    Message = $"There's a new version of WideEye. v{VersionCheck.LatestVersion} \nPlease update for the latest features and bug fixes",
+                    Type = NotificationType.Information,
+                    PopupLength = 3,
+                    ShowTitleOnPopup = true
+                });
+                yield break;
+            }
+            
+            //If nothing's wrong with WideEye, send a success notification
             Notifier.Send(new Notification
             {
                 Title = "WideEye | Success",
@@ -106,6 +128,8 @@ namespace WideEye.Core
 
         private void BoneLib_OnLevelUnloaded()
         {
+            // Reset all variables on level unloaded
+            
             FoundCamera = false;
             if (TimelineHelper.UsingTimeline)
             {

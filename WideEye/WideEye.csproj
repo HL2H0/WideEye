@@ -35,6 +35,7 @@
 		<Compile Include="Utilities\Paths.cs" />
 		<Compile Include="Utilities\SettingsUpdater.cs" />
 		<Compile Include="Utilities\TimelineHelper.cs" />
+		<Compile Include="Utilities\VersionCheck.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
