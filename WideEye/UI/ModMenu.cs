@@ -240,7 +240,7 @@ namespace WideEye.UI
             //---------------------------------
             
             AvatarMeshesPage = MainPage.CreatePage("Avatar Meshes Toggles", Color.yellow); 
-            AvatarMeshesPage.CreateFunction("Toggle Head Mesh Offset", Color.cyan, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HeasdMeshOffset));
+            AvatarMeshesPage.CreateFunction("Toggle Head Mesh Offset", Color.cyan, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HeadMeshOffset));
             AvatarMeshesPage.CreateFunction("Toggle Head Meshes", Color.white, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HeadMesh));
             AvatarMeshesPage.CreateFunction("Toggle Hair Meshes", Color.white, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HairMeshes));
             AvatarMeshesPage.CreateFunction("-------------------", Color.white, null);

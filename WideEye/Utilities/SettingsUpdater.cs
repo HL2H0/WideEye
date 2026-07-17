@@ -115,7 +115,7 @@ namespace WideEye.Utilities
                     else Mod.PlayerArtComponent.DisableHair();
                     foreach (var mesh in Player.Avatar.hairMeshes) mesh.enabled = _currentHairMeshState;
                     break;
-                case ModEnums.MeshToggleType.HeasdMeshOffset:
+                case ModEnums.MeshToggleType.HeadMeshOffset:
                     Mod.PlayerArtComponent.enabled = !Mod.PlayerArtComponent.enabled;
                     break;
             }
