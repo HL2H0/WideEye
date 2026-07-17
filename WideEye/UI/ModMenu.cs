@@ -128,7 +128,7 @@ namespace WideEye.UI
             var page = PresetsPage.CreatePage(presetName, Color.white);
             if (preset != null)
             {
-                page.CreateFunction("Save Current Setting To This", Color.cyan, () => PresetsManager.SavePreset(presetName));
+                page.CreateFunction("Override Preset with current settings", Color.cyan, () => PresetsManager.SavePreset(presetName));
                 page.CreateFunction("Load This Preset", Color.green, () => PresetsManager.ApplyPreset(presetName));
                 page.CreateFunction("View Path", Color.yellow, () => PresetsManager.ViewPath(presetName));
                 var valuesPage = page.CreatePage("Values [Experimental]", Color.magenta);
