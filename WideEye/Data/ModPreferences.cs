@@ -157,7 +157,7 @@ namespace WideEye.Data
                 _aeEvCompensation.Value, _aeEvMax.Value, _aeEvMin.Value, _aeL2Ds.Value, _aeMeteringMask.Value,
                 _aeMetProcedFalloff.Value, true);
             
-            MelonLogger.Msg(ConsoleColor.Green, "Loaded Preferences.");
+            Melon<Mod>.Logger.Msg(ConsoleColor.Green, "Loaded Preferences.");
         }
 
         public static void SavePreferences()
@@ -210,7 +210,7 @@ namespace WideEye.Data
 
             if (AutoSave) return;
             
-            MelonLogger.Msg(ConsoleColor.Green, "Saved Preferences.");
+            Melon<Mod>.Logger.Msg(ConsoleColor.Green, "Saved Preferences.");
             if(HideNonErrorNotification) return;
             Notifier.Send(new Notification
             {
@@ -239,7 +239,7 @@ namespace WideEye.Data
             
             LoadPreferences();
             
-            MelonLogger.Msg(ConsoleColor.Green, "Done!, Cleared All Preferences");
+            Melon<Mod>.Logger.Msg(ConsoleColor.Green, "Done!, Cleared All Preferences");
             if(HideNonErrorNotification) return;
             Notifier.Send(new Notification
             {

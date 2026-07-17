@@ -33,16 +33,16 @@ namespace WideEye.Data
                         {
                             presetClass.MkGlowEnabled = true;
                         }
-                        MelonLogger.Msg($"Loaded Preset: {presetClass.Name}");
+                        Melon<Mod>.Logger.Msg($"Loaded Preset: {presetClass.Name}");
                     }
                     else
                     {
-                        MelonLogger.Error($"Preset {preset} Couldn't be Loaded");
+                        Melon<Mod>.Logger.Error($"Preset {preset} Couldn't be Loaded");
                     }
                 }
                 catch (Exception e)
                 {
-                    MelonLogger.Error($"Preset \"{preset}\" Is Corrupted\nError Message {e.Message}\n");
+                    Melon<Mod>.Logger.Error($"Preset \"{preset}\" Is Corrupted\nError Message {e.Message}\n");
                 }
 
             }
@@ -71,7 +71,7 @@ namespace WideEye.Data
                 SettingsUpdater.UpdateLensDistortion(preset.LdEnabled, preset.LdCenter.ToVector2(), preset.LdIntensity, preset.LdScale,
                     preset.LdMultiplyer.X, preset.LdMultiplyer.Y, true);
                 
-                MelonLogger.Msg($"Applied Preset: {presetName}");
+                Melon<Mod>.Logger.Msg($"Applied Preset: {presetName}");
             }
         }
 
@@ -88,7 +88,7 @@ namespace WideEye.Data
                 var path = Path.Combine(Paths.PresetsPath, $"{presetName}.json");
                 File.WriteAllText(path, json);
                 
-                MelonLogger.Msg($"Saved Preset: {presetName}");
+                Melon<Mod>.Logger.Msg($"Saved Preset: {presetName}");
             }
         }
 
@@ -104,12 +104,12 @@ namespace WideEye.Data
                     if (presetClass != null)
                     {
                         Presets.Add(presetName, presetClass);
-                        MelonLogger.Msg($"Loaded Preset: {presetName}");
+                        Melon<Mod>.Logger.Msg($"Loaded Preset: {presetName}");
                         ModMenu.CreateOnePresetPage(presetName);
                     }
                     else
                     {
-                        MelonLogger.Error($"Preset {presetName} Couldn't be Loaded");
+                        Melon<Mod>.Logger.Error($"Preset {presetName} Couldn't be Loaded");
                     }
                 }
             }
@@ -119,7 +119,7 @@ namespace WideEye.Data
         {
             var path = Path.Combine(Paths.PresetsPath, $"{presetName}.json");
             if (!File.Exists(path)) return;
-            MelonLogger.Msg($"Path: {path}");
+            Melon<Mod>.Logger.Msg($"Path: {path}");
             ProcessStartInfo processStartInfo = new("explorer.exe", $"/select, \"{path}\"");
             Process.Start(processStartInfo);
         }
@@ -137,7 +137,7 @@ namespace WideEye.Data
             
             ModMenu.CreateOnePresetPage(presetName);
             
-            MelonLogger.Msg($"Created Preset: {presetName}");
+            Melon<Mod>.Logger.Msg($"Created Preset: {presetName}");
         }
         
         public static void DeletePreset(string presetName)
@@ -148,7 +148,7 @@ namespace WideEye.Data
                 var path = Path.Combine(Paths.PresetsPath, $"{presetName}.json");
                 if (File.Exists(path)) File.Delete(path);
                 
-                MelonLogger.Msg($"Deleted Preset: {presetName}");
+                Melon<Mod>.Logger.Msg($"Deleted Preset: {presetName}");
             }
         }
     }

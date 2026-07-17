@@ -1,6 +1,7 @@
 using System.Reflection;
 using BoneLib;
 using Il2CppSLZ.Marrow.Warehouse;
+using MelonLoader;
 using UnityEngine;
 using WideEye.Behaviors;
 using WideEye.Core;
@@ -37,15 +38,15 @@ public static class ResourcesManager
             var version = new Version(pallet.Version);
             if (version < minVersion)
             {
-                MelonLoader.MelonLogger.Error($"WideEye pallet version {version} is too old. Minimum required version is {minVersion}.");
+                Melon<Mod>.Logger.Error($"WideEye pallet version {version} is too old. Minimum required version is {minVersion}.");
                 return;
             }
-            MelonLoader.MelonLogger.Msg($"Found WideEye pallet version {version}.");
+            Melon<Mod>.Logger.Msg($"Found WideEye pallet version {version}.");
             PalletInstalled = true;
         }
 
         if (PalletInstalled) return;
-        MelonLoader.MelonLogger.Error($"WideEye pallet not found in AssetWarehouse.");
+        Melon<Mod>.Logger.Error($"WideEye pallet not found in AssetWarehouse.");
         BoneLib.Notifications.Notifier.Send(new BoneLib.Notifications.Notification
         {
             Title = "WideEye | Error",

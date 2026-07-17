@@ -24,7 +24,7 @@ public static class SpectatorCameraManager
                 ShowTitleOnPopup = true
             });
             
-            MelonLogger.Error("WideEye doesn't work with Quest");
+            Melon<Mod>.Logger.Error("WideEye doesn't work with Quest");
             return;
         }
 
@@ -47,7 +47,7 @@ public static class SpectatorCameraManager
                 PopupLength = 5,
                 ShowTitleOnPopup = true
             });
-            MelonLogger.Error(isAuto ? "Couldn't find the camera automatically" : "Couldn't find the camera");
+            Melon<Mod>.Logger.Error(isAuto ? "Couldn't find the camera automatically" : "Couldn't find the camera");
             return;
         }
 
@@ -63,7 +63,7 @@ public static class SpectatorCameraManager
                     PopupLength = 5,
                     ShowTitleOnPopup = true
                 });
-                MelonLogger.Warning("Spectator Mode isn't set to \"Fish Eye\"Change it so WideEye can work");
+                Melon<Mod>.Logger.Warning("Spectator Mode isn't set to \"Fish Eye\"Change it so WideEye can work");
             }
 
             InitializeComponents();
@@ -101,6 +101,6 @@ public static class SpectatorCameraManager
             Notifier.Send(notification);
         }
         
-        MelonLogger.Msg(ConsoleColor.Green, isAuto ? "Found camera automatically" : "Found camera manually");
+        Melon<Mod>.Logger.Msg(ConsoleColor.Green, isAuto ? "Found camera automatically" : "Found camera manually");
     }
 }

@@ -28,7 +28,7 @@ public static class HandheldCameraManager
         }
         catch(Exception ex)
         {
-            MelonLogger.Error($"Failed to find Handheld Camera : {ex}");
+            Melon<Mod>.Logger.Error($"Failed to find Handheld Camera : {ex}");
         }
     }
     

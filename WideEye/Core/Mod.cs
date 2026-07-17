@@ -78,7 +78,7 @@ namespace WideEye.Core
         {
             MelonCoroutines.Start(StartWideEye(ModPreferences.StartupDelay));
             MenuShortcut.CreateShortcut();
-            MelonLogger.Msg(System.ConsoleColor.Green, "UI Rig Created, Trying To Get Camera...");
+            Melon<Mod>.Logger.Msg(System.ConsoleColor.Green, "UI Rig Created, Trying To Get Camera...");
         }
         
         private static IEnumerator StartWideEye(float waitTime)
