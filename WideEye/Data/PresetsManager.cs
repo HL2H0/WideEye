@@ -29,11 +29,15 @@ namespace WideEye.Data
                     var presetClass = JsonSerializer.Deserialize<WideEyeSettings>(File.ReadAllText(preset));
                     if (presetClass != null)
                     {
+                        //Fixes any broken presets from v4.0.0
+                        if(string.IsNullOrEmpty(presetClass.Name)) presetClass.Name = Path.GetFileNameWithoutExtension(preset);
+                        
                         Presets.Add(presetClass.Name, presetClass);
                         if (presetClass.Version != BuildInfo.Version)
                         {
                             presetClass.MkGlowEnabled = true;
                         }
+                        
                         Melon<Mod>.Logger.Msg($"Loaded Preset: {presetClass.Name}");
                     }
                     else
