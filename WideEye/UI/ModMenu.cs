@@ -2,6 +2,7 @@
 using BoneLib.BoneMenu;
 using BoneLib.Notifications;
 using Il2CppOccaSoftware.Exposure.Runtime;
+using Il2CppSLZ.Marrow.Zones;
 using UnityEngine;
 using WideEye.CameraManagers;
 using WideEye.Core;
@@ -193,19 +194,18 @@ namespace WideEye.UI
             MainPage.CreateFunction("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.Fov));
             MainPage.CreateFunction("Save Preferences", Color.green, ModPreferences.SavePreferences);
             
-            //---------------------------------
-
+            #region Post-Processing
             PostFXPage = MainPage.CreatePage("Post-Processing", Color.yellow);
             PostFXToggle = PostFXPage.CreateBool("Enabled", Color.yellow, true, value => SettingsUpdater.TogglePostFX(value));
             
-            //---------------------------------
-            
+            #region MKGlow
             MkGlowPage = PostFXPage.CreatePage("MKGlow", Color.white);
             MkGlowEnabled = MkGlowPage.CreateBool("Enabled", Color.cyan, true, _ => SettingsUpdater.UpdateMkGlow());
             MkGlowPage.CreateFunction("More Features are coming soon!", Color.white, null);
             MkGlowPage.CreateFunction("Reset To Default", Color.red , () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.MKGlow));
+            #endregion
             
-            //---------------------------------
+            #region Lens Distortion
             LensDistortionPage = PostFXPage.CreatePage("Lens Distortion", Color.white);
             LdEnabled = LensDistortionPage.CreateBool("Enabled", Color.cyan, true, _ => SettingsUpdater.UpdateLensDistortion());
             LdCenterX = LensDistortionPage.CreateFloat("Center X", Color.red, 0.50f, 0.1f, 0f, 1f, _ => SettingsUpdater.UpdateLensDistortion());
@@ -215,16 +215,16 @@ namespace WideEye.UI
             LdXMultiplier = LensDistortionPage.CreateFloat("X Multiplier", Color.red, 0.59f, 0.01f, 0f, 1f, _ => SettingsUpdater.UpdateLensDistortion());
             LdYMultiplier = LensDistortionPage.CreateFloat("Y Multiplier", Color.green, 1f, 0.01f, 0f, 1f, _ => SettingsUpdater.UpdateLensDistortion());
             LensDistortionPage.CreateFunction("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.LensDistortion));
+            #endregion
             
-            //---------------------------------
-            
+            #region ChromaticAberration
             ChromaticAberrationPage = PostFXPage.CreatePage("ChromaticAberration", Color.white);
             CaEnabled = ChromaticAberrationPage.CreateBool("Enabled", Color.cyan, true, _ => SettingsUpdater.UpdateChromaticAberration());
             CaIntensity = ChromaticAberrationPage.CreateFloat("Intensity", Color.white, 0.123f, 0.01f, 0f, 1f, _ => SettingsUpdater.UpdateChromaticAberration());
             ChromaticAberrationPage.CreateFunction("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.ChromaticAberration));
+            #endregion
             
-            //---------------------------------
-            
+            #region AutoExposure
             AutoExposurePage = PostFXPage.CreatePage("AutoExposure", Color.white);
             AeEnabled = AutoExposurePage.CreateBool("Enabled", Color.cyan, true, _ => SettingsUpdater.UpdateAutoExposure());
             AeAdaptationMode = AutoExposurePage.CreateEnum("Adaptation Mode", Color.white, AutoExposureAdaptationMode.Progressive, _ => SettingsUpdater.UpdateAutoExposure());
@@ -236,9 +236,10 @@ namespace WideEye.UI
             AeMeteringMaskMode = AutoExposurePage.CreateEnum("Metering Mask Mode", Color.white, AutoExposureMeteringMaskMode.Procedural, null);
             AeMeteringProceduralFalloff = AutoExposurePage.CreateFloat("Metering Procedural Falloff", Color.white, 2f, 0.1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateAutoExposure());
             AutoExposurePage.CreateFunction("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.AutoExposure));
+            #endregion
+            #endregion
             
-            //---------------------------------
-            
+            #region Avatar Meshes Toggles
             AvatarMeshesPage = MainPage.CreatePage("Avatar Meshes Toggles", Color.yellow); 
             AvatarMeshesPage.CreateFunction("Toggle Head Mesh Offset", Color.cyan, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HeadMeshOffset));
             AvatarMeshesPage.CreateFunction("Toggle Head Meshes", Color.white, () => SettingsUpdater.ToggleAvatarMesh(ModEnums.MeshToggleType.HeadMesh));
@@ -246,9 +247,9 @@ namespace WideEye.UI
             AvatarMeshesPage.CreateFunction("-------------------", Color.white, null);
             AvatarMeshesPage.CreateFunction("Note: You might need to", Color.yellow, null);
             AvatarMeshesPage.CreateFunction("Press the button twice", Color.yellow, null);
+            #endregion
             
-            //---------------------------------
-            
+            #region Offset
             OffsetPage = MainPage.CreatePage("Offset", Color.white);
             
             XrOffset = OffsetPage.CreateFloat("X Rotation Offset", Color.red, 11f, 1f, float.MinValue, float.MaxValue, _ => SettingsUpdater.UpdateOffset(ModEnums.OffsetType.Rotation));
@@ -261,16 +262,16 @@ namespace WideEye.UI
             OffsetPage.CreateFunction(" -------------------- ", Color.white, null).SetProperty(ElementProperties.NoBorder);
             OffsetPage.CreateFunction("Reset Position", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.PositionOffset));
             OffsetPage.CreateFunction("Reset Rotation", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.RotationOffset));
-            
-            //---------------------------------
-            
+            #endregion
+
+            #region Smoothing
             SmoothingPage = MainPage.CreatePage("Smoothing", Color.white);
             PSmoothing = SmoothingPage.CreateFloat("Position Smoothing", Color.white, 0f, 1f, float.MinValue, int.MaxValue, _ => SettingsUpdater.UpdateSmoothing());
             RSmoothing = SmoothingPage.CreateFloat("Rotation Smoothing", Color.white, 0f, 1f, float.MinValue, int.MaxValue, _ => SettingsUpdater.UpdateSmoothing());
             SmoothingPage.Add(new FunctionElement("Reset To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.Smoothing)));
-            
-            //---------------------------------
-            
+            #endregion
+
+            #region Presets
             PresetsPage = MainPage.CreatePage("Presets", Color.magenta);
             var presetInput = PresetsPage.CreateString("Preset Name", Color.white, "", null);
             PresetsPage.CreateFunction("Create Preset", Color.green, () => PresetsManager.CreatePreset(presetInput.Value));
@@ -291,9 +292,9 @@ namespace WideEye.UI
             });
             PresetsPage.CreateFunction("--------------------", Color.white, null).SetProperty(ElementProperties.NoBorder);
             CreatePresetsPage();
-            
-            //---------------------------------
-            
+            #endregion
+
+            #region ViewPage
             ViewPage = MainPage.CreatePage("View", Color.cyan);
             ViewMode = ViewPage.CreateEnum("View Mode", Color.white, ModEnums.ViewMode.Head, v => CameraController.UpdateView((ModEnums.ViewMode)v));
             AudioSource = ViewPage.CreateEnum("Audio Source", Color.white, ModEnums.AudioSource.Head, v => CameraController.UpdateAudioSource((ModEnums.AudioSource)v));
@@ -314,9 +315,9 @@ namespace WideEye.UI
             FreeCamScrollSensitivity = FreeCamPage.CreateFloat("Scroll Sensitivity", Color.white, 15f, 1, 0, float.MaxValue,v => FreeCamManager.ScrollSensitivity = v);
             FreeCamScrollSmoothing = FreeCamPage.CreateFloat("Scroll Smoothing", Color.white, 10f, 1, 0, float.MaxValue,v => FreeCamManager.ScrollSmoothing = v);
             FreeCamShowIndicator = FreeCamPage.CreateBool("Show Indicator", Color.white, true, v => FreeCamManager.ShowIndicator = v);
+            #endregion
             
-            
-            //---------------------------------
+            #region Mod Settings
             ModSettingsPage = MainPage.CreatePage("Mod Settings", Color.green);
 
             ModSettingsPage.CreateFunction("Get Camera Manually", Color.red, () => SpectatorCameraManager.GetSpectatorCamera(false));
@@ -326,6 +327,7 @@ namespace WideEye.UI
             ModSettingsPage.CreateFunction("Reset All To Default", Color.red, () => SettingsUpdater.ResetToDefault(ModEnums.ResetType.All));
             ModSettingsPage.CreateFunction("Load Preferences", Color.green, ModPreferences.LoadPreferences);
             ModSettingsPage.CreateFunction("Clear All Preferences", Color.red, ModPreferences.ClearPreferences);
+            #region -----Support Page-----
             SupportPage = ModSettingsPage.CreatePage("Support", Color.white);
             SupportPage.CreateFunction("Open GitHub Issues", Color.white, () =>
             {
@@ -340,6 +342,7 @@ namespace WideEye.UI
                     ShowTitleOnPopup = true
                 });
             });
+            
 
             SupportPage.CreateFunction("Discord", Color.blue, () =>
             {
@@ -369,6 +372,8 @@ namespace WideEye.UI
             });
 
             SupportPage.CreateFunction($"Version :  {BuildInfo.Version}", Color.white, null);
+            #endregion
+            #endregion
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Text.Json;
 using Il2CppSystem.Text;
 using MelonLoader;
 using WideEye.Core;
+using BuildInfo = WideEye.Core.BuildInfo;
 
 namespace WideEye.Utilities;
 

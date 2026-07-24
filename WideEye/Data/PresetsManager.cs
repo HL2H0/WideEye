@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using WideEye.Core;
 using WideEye.Utilities;
 using WideEye.UI;
+using BuildInfo = WideEye.Core.BuildInfo;
 
 namespace WideEye.Data
 {
