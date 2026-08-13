@@ -13,23 +13,35 @@ public static class HandheldCameraManager
     public static GameObject ActiveHandheldCamera;
     public static HandheldCamera ActiveScript;
     
-    public static bool Found => ActiveHandheldCamera;
     
-    public static void FindHandheldCamera()
+    public static bool Registered => ActiveHandheldCamera;
+    
+    // public static void FindHandheldCamera()
+    // {
+    //     if(Found) return;
+    //     try
+    //     {
+    //         ActiveHandheldCamera = GameObject.Find("Handheld Camera [0]");
+    //         if (ActiveHandheldCamera == null) return;
+    //         ActiveScript = ActiveHandheldCamera.GetComponent<HandheldCamera>();
+    //         if (ActiveScript == null) return;
+    //         ActiveScript.SyncCamera = Mod.ScCameraComponent;
+    //     }
+    //     catch(Exception ex)
+    //     {
+    //         Melon<Mod>.Logger.Error($"Failed to find Handheld Camera : {ex}");
+    //     }
+    // }
+
+    public static void RegisterCamera(GameObject camera)
     {
-        if(Found) return;
-        try
-        {
-            ActiveHandheldCamera = GameObject.Find("Handheld Camera [0]");
-            if (ActiveHandheldCamera == null) return;
-            ActiveScript = ActiveHandheldCamera.GetComponent<HandheldCamera>();
-            if (ActiveScript == null) return;
-            ActiveScript.SyncCamera = Mod.ScCameraComponent;
-        }
-        catch(Exception ex)
-        {
-            Melon<Mod>.Logger.Error($"Failed to find Handheld Camera : {ex}");
-        }
+        ActiveHandheldCamera = camera;
+        ActiveScript = camera.GetComponent<HandheldCamera>();
+    }
+    public static void UnregisterCamera()
+    {
+        ActiveHandheldCamera = null;
+        ActiveScript = null;
     }
     
 
@@ -41,7 +53,7 @@ public static class HandheldCameraManager
 
     public static void DestroyHandheldCamera()
     {
-        if (!Found) return;
+        if (!Registered) return;
         AssetSpawner.Despawn(ActiveHandheldCamera.GetComponent<Poolee>());
         Object.Destroy(ActiveHandheldCamera);
         ActiveHandheldCamera = null;
@@ -50,7 +62,7 @@ public static class HandheldCameraManager
     
     public static void TeleportHandheldCamera()
     { 
-        if(!Found) return;
+        if(!Registered) return;
         var pos = Player.Head.position + Player.Head.forward * 0.5f;
         ActiveHandheldCamera.transform.position = pos;
     }

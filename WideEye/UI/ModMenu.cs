@@ -40,6 +40,8 @@ namespace WideEye.UI
         public static EnumElement ViewMode { get; private set; }
         public static BoolElement ChangeViewOnSpawn { get; private set; }
         public static EnumElement AudioSource { get; private set; }
+        public static FloatElement HandheldZoomSpeed { get; private set; }
+        public static FloatElement HandheldZoomSmoothing { get; private set; }
         
         //---------- | Free Cam Page | ----------
         public static FloatElement FreeCamSpeed { get; private set; }
@@ -301,7 +303,8 @@ namespace WideEye.UI
             
             HandheldCameraPage = ViewPage.CreatePage("Handheld Camera Settings", Color.white);
             ChangeViewOnSpawn = HandheldCameraPage.CreateBool("Change View On Spawn", Color.yellow, true, v => ModPreferences.ChangeViewOnSpawn = v);
-            
+            HandheldZoomSpeed = HandheldCameraPage.CreateFloat("Zoom Speed", Color.cyan, 1, .5f, 0, float.MaxValue, v => ModPreferences.HandheldZoomSpeed = v);
+            HandheldZoomSmoothing = HandheldCameraPage.CreateFloat("Zoom Smoothing", Color.green, 0f, .1f, 0f, float.MaxValue, v => ModPreferences.HandheldZoomSmoothing = v);
             HandheldCameraPage.CreateFunction("Spawn Camera [Client Side]", Color.green, HandheldCameraManager.SpawnHandheldCamera);
             HandheldCameraPage.CreateFunction("Teleport Camera", Color.cyan, HandheldCameraManager.TeleportHandheldCamera);
             HandheldCameraPage.CreateFunction("Destroy Camera [Client Side]", Color.red, HandheldCameraManager.DestroyHandheldCamera);

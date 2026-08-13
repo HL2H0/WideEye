@@ -1,5 +1,6 @@
 using System;
 using Il2CppTMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using WideEye.CameraManagers;
 using WideEye.Core;
@@ -35,6 +36,7 @@ namespace WideEye.Behaviors
         
         private Rigidbody _rb;
         private bool _isTarget;
+        private float _targetFOV;
 
 
         private Color[] _lightColors = { new(1f, 0.847f, 0.694f), new(0.831f, 0.945f, 0.976f), new(0.961f, 0.961f, 0.961f) };
@@ -45,15 +47,15 @@ namespace WideEye.Behaviors
 
         private void OnEnable()
         {
+            HandheldCameraManager.RegisterCamera(gameObject);
             if (ModPreferences.ChangeViewOnSpawn)
                 CameraController.UpdateView(ModEnums.ViewMode.Handheld, true);
         }
 
         private void OnDisable()
         {
+            HandheldCameraManager.UnregisterCamera();
             CameraController.UpdateView(ModEnums.ViewMode.Head, true);
-            HandheldCameraManager.ActiveHandheldCamera = null;
-            HandheldCameraManager.ActiveScript = null;
             CameraController.UpdateAudioSource(ModEnums.AudioSource.Head, true);
         }
         
@@ -63,10 +65,13 @@ namespace WideEye.Behaviors
             _rb = GetComponent<Rigidbody>();
             fovLabel.text = $"FOV : {FOV}";
             lightIntensityLabel.text = $"Light Intensity : {cameraLight.intensity}";
+            _targetFOV = FOV;
         }
+        
         private void Update()
         {
             _isTarget = SyncCamera;
+            FOV = Mathf.Lerp(FOV, _targetFOV, Time.deltaTime / ModPreferences.HandheldZoomSmoothing );
         }
         
         public void ToggleKinematic()
@@ -88,7 +93,7 @@ namespace WideEye.Behaviors
         
         public void AddFOV(float fov)
         {
-            FOV += fov;
+            _targetFOV += fov * ModPreferences.HandheldZoomSpeed;
         }
     
         public void TogglePreview()

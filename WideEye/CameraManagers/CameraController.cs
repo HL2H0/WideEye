@@ -33,7 +33,7 @@ public static class CameraController
     {
         Mod.ScSmootherComponent.targetTransform = Mod.StTransform;
         if(TimelineHelper.UsingTimeline) TimelineHelper.TimelineSmoothFollower.targetTransform = Mod.StTransform;
-        if (HandheldCameraManager.Found) HandheldCameraManager.ActiveScript.SyncCamera = null;
+        if (HandheldCameraManager.Registered) HandheldCameraManager.ActiveScript.SyncCamera = null;
         SettingsUpdater.UpdateFOV(ModMenu.FOVSlider.Value);
         FreeCamManager.FreeCamObject.SetActive(false);
         
@@ -42,8 +42,8 @@ public static class CameraController
 
     private static void SetViewHandheld()
     {
-        HandheldCameraManager.FindHandheldCamera();
-        if (!HandheldCameraManager.Found) 
+        // HandheldCameraManager.FindHandheldCamera();
+        if (!HandheldCameraManager.Registered) 
         {
             Notifier.Send(new Notification
             {
@@ -55,6 +55,7 @@ public static class CameraController
             });
         }
                 
+        HandheldCameraManager.ActiveScript.SyncCamera = Mod.ScCameraComponent;
         if (TimelineHelper.UsingTimeline)
         {
             TimelineHelper.TimelineSmoothFollower.targetTransform = HandheldCameraManager.ActiveScript.cameraTarget;
@@ -72,7 +73,7 @@ public static class CameraController
     private static void SetViewFreeCam()
     {
         Mod.ScSmootherComponent.targetTransform = FreeCamManager.FreeCamObject.transform;
-        if (HandheldCameraManager.Found) HandheldCameraManager.ActiveScript.SyncCamera = null;
+        if (HandheldCameraManager.Registered) HandheldCameraManager.ActiveScript.SyncCamera = null;
         FreeCamManager.FreeCamObject.transform.position = Player.Head.position;
         FreeCamManager.FreeCamObject.transform.rotation = Player.Head.rotation;
         FreeCamManager.FreeCamObject.SetActive(true);
@@ -85,10 +86,10 @@ public static class CameraController
         switch (audioSource)
         {
             case ModEnums.AudioSource.Head:
-                if (HandheldCameraManager.Found) HandheldCameraManager.ActiveScript.audioListener.enabled = false;
+                if (HandheldCameraManager.Registered) HandheldCameraManager.ActiveScript.audioListener.enabled = false;
                 break;
             case ModEnums.AudioSource.Handheld:
-                if (HandheldCameraManager.Found) HandheldCameraManager.ActiveScript.audioListener.enabled = true;
+                if (HandheldCameraManager.Registered) HandheldCameraManager.ActiveScript.audioListener.enabled = true;
                 break;
         }
         if (syncElements)

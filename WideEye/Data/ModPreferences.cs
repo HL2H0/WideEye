@@ -14,13 +14,56 @@ namespace WideEye.Data
         public static bool HideNonErrorNotification
         {
             get => _hideNonErrorNotification.Value;
-            set => _hideNonErrorNotification.Value = value; 
+            set
+            {
+                _hideNonErrorNotification.Value = value;
+                if (AutoSave) SavePreferences();
+            } 
         }
 
         public static bool AutoSave;
-        public static int StartupDelay { get => _startupDelay.Value; set => _startupDelay.Value = value; }
-        public static bool ChangeViewOnSpawn { get => _changeViewOnSpawn.Value; set => _changeViewOnSpawn.Value = value; }
-        
+
+        public static int StartupDelay
+        {
+            get => _startupDelay.Value;
+            set
+            {
+                _startupDelay.Value = value;
+                if (AutoSave) SavePreferences();
+            }
+        }
+
+        public static bool ChangeViewOnSpawn
+        {
+            get => _changeViewOnSpawn.Value;
+            set
+            {
+                _changeViewOnSpawn.Value = value;
+                if (AutoSave) SavePreferences();
+            }
+        }
+
+        public static float HandheldZoomSpeed
+        {
+            get => _handheldZoomSpeed.Value;
+            set
+            {
+                _handheldZoomSpeed.Value = value;
+                if (AutoSave) SavePreferences();
+            }
+
+        }
+
+        public static float HandheldZoomSmoothing
+        {
+            get => _handheldZoomSmoothing.Value;
+            set
+            {
+                _handheldZoomSmoothing.Value = value;
+                if (AutoSave) SavePreferences();
+            }
+        }
+
         private static MelonPreferences_Category _categWideEye;
         private static MelonPreferences_Entry<float> _fov;
         private static MelonPreferences_Entry<bool> _postFX;
@@ -33,6 +76,8 @@ namespace WideEye.Data
         private static MelonPreferences_Entry<bool> _autoSave;
         private static MelonPreferences_Entry<int> _startupDelay;
         private static MelonPreferences_Entry<bool> _changeViewOnSpawn;
+        private static MelonPreferences_Entry<float> _handheldZoomSpeed;
+        private static MelonPreferences_Entry<float> _handheldZoomSmoothing;
         
         private static MelonPreferences_Entry<float> _freeCamSpeed;
         private static MelonPreferences_Entry<float> _freeCamFastSpeed;
@@ -51,7 +96,7 @@ namespace WideEye.Data
         private static MelonPreferences_Entry<Vector2> _ldCenter;
         private static MelonPreferences_Entry<float> _ldIntensity;
         private static MelonPreferences_Entry<float> _ldScale;
-        private static MelonPreferences_Entry<float> _ldXMultiplier;
+        private static MelonPreferences_Entry<float> _ldXMultiplier;    
         private static MelonPreferences_Entry<float> _ldYMultiplier;
 
         private static MelonPreferences_Category _categPfxCa;
@@ -89,6 +134,8 @@ namespace WideEye.Data
             _freeCamScrollSmoothing = _categWideEye.CreateEntry("FreeCamScrollSmoothing", 10f);
             _freecamIndicator = _categWideEye.CreateEntry("FreeCamIndicator", true);
             _changeViewOnSpawn = _categWideEye.CreateEntry("ChangeViewOnSpawn", true);
+            _handheldZoomSpeed = _categWideEye.CreateEntry("HandheldZoomSpeed", 1f);
+            _handheldZoomSmoothing = _categWideEye.CreateEntry("HandheldZoomSmoothing", 0f);
             
             _categPfxMk = MelonPreferences.CreateCategory("WideEye_PostFX_MKGlow");
             _mkEnabled = _categPfxMk.CreateEntry("Enabled", true);
@@ -129,6 +176,8 @@ namespace WideEye.Data
             ModMenu.HideNonErrorNotifications.Value = _hideNonErrorNotification.Value;
             ModMenu.StartupDelay.Value = _startupDelay.Value;
             ModMenu.ChangeViewOnSpawn.Value = _changeViewOnSpawn.Value;
+            ModMenu.HandheldZoomSpeed.Value = _handheldZoomSpeed.Value;
+            ModMenu.HandheldZoomSmoothing.Value = _handheldZoomSmoothing.Value;
             ModMenu.AutoSave.Value = _autoSave.Value;
             AutoSave = _autoSave.Value;
             
@@ -171,6 +220,9 @@ namespace WideEye.Data
 
             _startupDelay.Value = ModMenu.StartupDelay.Value;
             _changeViewOnSpawn.Value = ModMenu.ChangeViewOnSpawn.Value;
+            _handheldZoomSpeed.Value = ModMenu.HandheldZoomSpeed.Value;
+            _handheldZoomSmoothing.Value = ModMenu.HandheldZoomSmoothing.Value;
+            
             _autoSave.Value = ModMenu.AutoSave.Value;
             _hideNonErrorNotification.Value = ModMenu.HideNonErrorNotifications.Value;
             

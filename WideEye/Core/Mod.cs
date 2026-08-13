@@ -136,7 +136,7 @@ namespace WideEye.Core
                 TimelineHelper.UsingTimeline = false;
                 TimelineHelper.ResetReferences();
             }
-            if (!HandheldCameraManager.Found) return;
+            if (!HandheldCameraManager.Registered) return;
             HandheldCameraManager.ActiveHandheldCamera = null;
             ModMenu.AudioSource.Value = ModEnums.AudioSource.Head;
             ModMenu.ViewMode.Value = ModEnums.ViewMode.Head;
